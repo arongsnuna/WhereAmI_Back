@@ -23,7 +23,8 @@ model Landmark {
   name String @unique @map("landmark_name")@db.VarChar(255)
   address String @db.VarChar(255)
   imagePath String @map("image_path")
-  area_id Int
-  areaId Area @relation(fields: [area_id], references: [id])
+  fileName String @map("file_name")
+  areaId Int @map("area_id")
+  area Area @relation(fields: [areaId], references: [id])
 }
   
