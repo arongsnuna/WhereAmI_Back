@@ -1,9 +1,9 @@
-import { PrismaService } from 'src/prisma.service'; 
 import { Landmark } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { GetLandmarkDto } from './dto/landmark.request.dto';
-import { LandmarkEntity } from 'src/entities/landmark.entity';
+import { LandmarkEntity } from 'src/landmarks/landmark.entity';
 import { plainToClass } from 'class-transformer';
+import { PrismaService } from 'src/prisma.service';
 
 
 @Injectable()
@@ -35,5 +35,5 @@ export class LandmarkRepository {
 
     return landmarks.map(landmark => plainToClass(LandmarkEntity, landmark));
   }
-
+  
 }

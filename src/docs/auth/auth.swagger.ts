@@ -11,4 +11,4 @@
 //     `,
 //     type: LandmarkResponseDto,
 // }
-// export default LandmarkResponse
+// export default LandmarkRespons

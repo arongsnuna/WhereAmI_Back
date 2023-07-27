@@ -3,14 +3,18 @@ import { LandmarkRepository } from './landmarks.repository';
 import { GetLandmarkDto } from './dto/landmark.request.dto';
 import { S3Service } from 'src/common/s3/s3.service';
 import { LandmarkResponseDto } from './dto/landmark.response.dto';
-import { getImagePath } from 'src/common/utils/s3.utils';
+import { getImagePath } from 'src/common/s3/s3.utils';
 import { plainToClass } from 'class-transformer';
+import { ConfigService } from '@nestjs/config';
+import { privateDecrypt } from 'crypto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class LandmarkService {
   constructor(
     private readonly landmarkRepo: LandmarkRepository,
     private readonly s3Service: S3Service,
+    private configService: ConfigService
   ) {}
  
   //해당 랜드마크 정보 추출 (이름으로 검색)
@@ -19,9 +23,8 @@ export class LandmarkService {
     if (!landmark) {
       throw new Error('Landmark not found');
     }
-
-    const imagePath = getImagePath(landmark.imagePath);
-    landmark.imagePath = imagePath;
+    this.s3Service.ensureImageIsPublic(landmark.fileName);
+    landmark.imagePath = getImagePath(this.configService, landmark.imagePath);
 
     return plainToClass(LandmarkResponseDto, landmark);
   }
@@ -34,11 +37,11 @@ export class LandmarkService {
       throw new Error('Landmark not found');
     }
 
-    //파일명 이름으로이미지 경로 업데이트
-    const updatedLandmarks = landmarks.map((landmark) => ({
-      ...landmark,
-      imagePath: getImagePath(landmark.imagePath),
-    }));
+    const updatedLandmarks = landmarks.map(async (landmark) => {
+      await this.s3Service.ensureImageIsPublic(landmark.fileName); // s3 이미지 ACL 설정 (public)
+      landmark.imagePath = getImagePath(this.configService, landmark.imagePath); // 이미지 경로 업데이트
+      return landmark;
+    });
   
     return updatedLandmarks.map(landmark => plainToClass(LandmarkResponseDto, landmark));
   }
