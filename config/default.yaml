@@ -1,0 +1,13 @@
+db:
+  type: "postgres"
+  port: 5432
+  database: "postgres"
+
+server:
+  port: 3000
+
+AiServer:
+  port: 5001
+
+jwt:
+  expiresIn: 3600
