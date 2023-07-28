@@ -1,14 +1,9 @@
-// import { Auth } from "src/landmarks/dto/landmark.response.dto"
+import { AuthResponseDto } from '../../auth/dto/auth.response.dto';
 
-// const LandmarkResponse = {
-//     status: 200,
-//     description: `
-//     제공 정보: 
-//      \`name\`: 제목 
-//      \`address\`: 주소 
-//      \`imagePath\`: 이미지 Path 
-//      \`nearByLandmarks\` : 근처 랜드마크 리스트
-//     `,
-//     type: LandmarkResponseDto,
-// }
-// export default LandmarkRespons
+const AuthResponse = {
+  status: 200,
+  description: '토큰 정보 제공\n\n - `token`: JWT 토큰',
+  type: AuthResponseDto,
+};
+
+export { AuthResponse };

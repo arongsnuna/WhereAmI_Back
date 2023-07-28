@@ -20,7 +20,7 @@ export class ImagesService {
     // 이미지 데이터 Base64 문자열 형태로 보내기
     try {
         const result$ = this.httpService.post( // Observable에서 첫 번째 값을 가져오는 기능
-          'http://127.0.0.1:5000/api-endpoint',//'http://localhost:5000/api-endpoint',
+          'http://127.0.0.1:5001/api-endpoint',//'http://localhost:5000/api-endpoint',
           { image: imageBase64 },
         );
         const response = await firstValueFrom(result$);
