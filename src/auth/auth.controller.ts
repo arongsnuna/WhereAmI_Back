@@ -22,14 +22,16 @@ export class AuthController {
     }
 
     @Post('login')
+    @HttpCode(200) // successfully logged in : 200
+    @ApiOperation({ summary: 'login' })
     async login(@Body(ValidationPipe) loginRequestDto: LoginRequestDto) : Promise<{accessToken: string}> {
     return this.authService.login(loginRequestDto);
     }
 
-    @Post('test')
-    @UseGuards(AuthGuard())
-    test(@Req() req){
-        console.log("req", req);
-    }
+    // @Post('test')
+    // @UseGuards(AuthGuard())
+    // test(@Req() req){
+    //     console.log("req", req);
+    // }
 
 }

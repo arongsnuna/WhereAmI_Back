@@ -31,7 +31,7 @@ export class AuthService {
             );
 
             //유저 등록
-            await this.userRepository.createUser({
+            const createUser = await this.userRepository.createUser({
                 email: user.email,
                 password: hashedPassword,
                 userName: user.userName,
@@ -45,7 +45,6 @@ export class AuthService {
 
     async login(loginRequestDto: LoginRequestDto): Promise<{accessToken: string}> {
         const user = await this.userRepository.getUserByUserName(loginRequestDto.userName);
-        console.log("user",user);
         if(user && (await this.security.comparePassword(loginRequestDto.password, user.password))) {
           // 유저 토큰 생성 ( Secret + Payload )
           const payload = { userName: user.userName };

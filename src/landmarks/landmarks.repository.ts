@@ -22,7 +22,7 @@ export class LandmarkRepository {
   }
 
   async findLandmarkByName(getLandmarkDto: GetLandmarkDto): Promise<LandmarkEntity> {
-    const landmark = await this.prisma.landmark.findUnique({ where: getLandmarkDto });
+    const landmark = await this.prisma.landmark.findUnique({ where: { name: getLandmarkDto.name } });
  
     return plainToClass(LandmarkEntity, landmark)
   }

@@ -12,51 +12,50 @@ datasource db {
 
 //Area 테이블 
 model Area {
-  id       Int @id @default(autoincrement()) @map("area_id")
-  siDo     String 
-  siGu     String 
+  id       Int        @id @default(autoincrement()) @map("area_id")
+  siDo     String
+  siGu     String
   Landmark Landmark[]
 }
 
 //Landmark 테이블
 model Landmark {
-  id         Int @id @default(autoincrement()) @map("landmark_id")
-  name       String @unique @map("landmark_name")@db.VarChar(255)
-  address    String @db.VarChar(255)
-  imagePath  String @map("image_path")
-  fileName   String @map("file_name")
-  areaId     Int @map("area_id")
-  area       Area @relation(fields: [areaId], references: [id])
+  id        Int    @id @default(autoincrement()) @map("landmark_id")
+  name      String @unique @map("landmark_name") @db.VarChar(255)
+  address   String @db.VarChar(255)
+  imagePath String @map("image_path")
+  fileName  String @map("file_name")
+  areaId    Int    @map("area_id")
+  area      Area   @relation(fields: [areaId], references: [id])
 
   bookmarks Bookmark[]
 }
 
 //User 테이블
 model User {
-  id          String    @id @default(uuid()) @map("user_id")
-  userName    String @unique @map("user_name") @db.VarChar(255)
-  email       String @db.VarChar(255)
+  id          String  @id @default(uuid()) @map("user_id")
+  userName    String  @unique @map("user_name") @db.VarChar(255)
+  email       String  @db.VarChar(255)
   password    String? @db.VarChar(255)
   profilePath String? @map("profile_path")
   description String?
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime? @db.Timestamp() @map("updated_at")
-  deletedAt DateTime? @db.Timestamp() @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @map("updated_at") @db.Timestamp()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp()
 
   bookmarks Bookmark[]
 }
 
 //Bookmark 모델
 model Bookmark {
-  landmarkId  Int @map("landmark_id")
-  userId      String @map("user_id")
-  createdAt   DateTime @default(now()) @map("created_at")
+  landmarkId Int      @map("landmark_id")
+  userId     String   @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  landmark Landmark @relation(fields: [landmarkId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   @@id([landmarkId, userId])
   @@map("bookmark")
-
-  landmark Landmark @relation(fields: [landmarkId], references: [id])
-  user     User @relation(fields: [userId], references: [id])
-
 }

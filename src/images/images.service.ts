@@ -19,7 +19,7 @@ export class ImagesService {
     // AI 서버에 POST 요청
     // 이미지 데이터 Base64 문자열 형태로 보내기
     try {
-        const result$ = this.httpService.post( // Observable에서 첫 번째 값을 가져오는 기능
+        const result$ = this.httpService.post( // Observable 사용
           'http://127.0.0.1:5001/api-endpoint',//'http://localhost:5000/api-endpoint',
           { image: imageBase64 },
         );

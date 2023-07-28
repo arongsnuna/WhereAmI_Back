@@ -21,17 +21,14 @@ export class LandmarkResponseDto {
   imagePath: string;
 
   @Exclude()
-  @ApiProperty({ description: 'The id of the landmark', example: 1 })
   @IsInt()
   id: number;
 
   @Exclude()
-  @ApiProperty({ description: 'The user id of the landmark', example: 1 })
   @IsString()
   fileName: string;
 
   @Exclude()
-  @ApiProperty({ description: 'The id of the landmark', example: 1 })
   @IsInt()
   areaId: number;
 }
