@@ -8,8 +8,9 @@ import { S3Service } from "src/common/s3/s3.service";
 import { ConfigService } from "@nestjs/config";
 
 @Module({
+  //imports: [S3Service],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository, PrismaService, Security, S3Service, ConfigService],
+  providers: [S3Service, UsersService, UsersRepository, PrismaService, Security, ConfigService],
   exports: [UsersRepository],
 })
 export class UsersModule {}

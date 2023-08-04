@@ -8,13 +8,7 @@ import { UsersModule } from "./users/users.module";
 import { BookmarksModule } from "./bookmarks/bookmarks.module";
 
 @Module({
-  imports: [
-    LandmarksModule,
-    AuthModule,
-    ImagesModule,
-    UsersModule,
-    BookmarksModule,
-  ],
+  imports: [UsersModule, LandmarksModule, AuthModule, ImagesModule, BookmarksModule],
   controllers: [AppController],
   providers: [AppService],
 })

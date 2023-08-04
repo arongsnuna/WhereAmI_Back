@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  ValidationPipe,
-} from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, Req, UseGuards, ValidationPipe } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { AuthResponse } from "src/docs/auth/auth.swagger";
@@ -14,6 +6,7 @@ import { LoginRequestDto, RegisterRequestDto } from "./dto/auth.request.dto";
 import { AuthRegisterResponseDto } from "./dto/auth.RegisterResponse.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { LocalAuthGuard } from "./authentication/guards/local.guard";
+import { AuthResponseDto } from "./dto/auth.response.dto";
 
 @ApiTags("Auth - Register")
 @Controller("users")
@@ -25,9 +18,7 @@ export class AuthController {
   @HttpCode(201) //successfully created : 201
   @ApiOperation({ summary: "Register a new user" })
   @Post("/new")
-  async register(
-    @Body(ValidationPipe) user: RegisterRequestDto,
-  ): Promise<AuthRegisterResponseDto> {
+  async register(@Body(ValidationPipe) user: RegisterRequestDto): Promise<AuthRegisterResponseDto> {
     return this.authService.register(user);
   }
 
@@ -36,9 +27,7 @@ export class AuthController {
   @HttpCode(200) // successfully logged in : 200
   @ApiOperation({ summary: "login" })
   @Post("login")
-  async login(
-    @Body(ValidationPipe) loginRequestDto: LoginRequestDto,
-  ): Promise<{ accessToken: string }> {
+  async login(@Body(ValidationPipe) loginRequestDto: LoginRequestDto): Promise<AuthResponseDto> {
     return this.authService.login(loginRequestDto);
   }
 

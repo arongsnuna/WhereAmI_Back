@@ -18,14 +18,15 @@ import { ToggleBookmarkDto, FindBookmarkDto, CreateBookmarkDto } from "./dto/boo
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { ResponseBookmarkDto, SiDoBookmarkListDto } from "./dto/bookmark.response.dto";
+import { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto } from "./dto/bookmark.response.dto";
+import { OptionalAuthGuard } from "src/auth/authentication/guards/optionAuth.guard";
 
 @ApiTags("bookmarks")
-@UseGuards(JwtAuthGuard)
 @Controller("bookmarks")
 export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post("toggle")
   toggleBookmark(
     @Request() req: any,
@@ -36,7 +37,26 @@ export class BookmarksController {
     return this.bookmarksService.toggleBookmark(userId, landmarkId);
   }
 
+  // 서버 코드
+
+  // @Get('/bookmarks')
+  // @UseGuards(OptionalAuthGuard) // <--- 여기서 OptionalAuthGuard를 사용합니다
+  // async getUserBookmarks(@Request() req: any): Promise<BookmarkDto[]> {
+  //   const userId = req.user?.id; // 로그인되지 않은 사용자의 경우 user가 undefined일 수 있음
+  //   return this.bookmarksService.getBookmarksByUserId(userId);
+  // }
+
+  @UseGuards(OptionalAuthGuard)
+  @Get("/bookmarks")
+  //@UseGuards(AuthGuard())
+  async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
+    console.log("req.user: ", req.user);
+    const userId = req.user?.id;
+    return this.bookmarksService.getBookmarksByUserId(userId);
+  }
+
   //지역구별 리스트
+  @UseGuards(JwtAuthGuard)
   @Get("user/:userId")
   async findBookmarksByUser(@Param("userId") findBookmarkDto: FindBookmarkDto): Promise<SiDoBookmarkListDto[]> {
     const userId = findBookmarkDto.userId;

@@ -21,9 +21,7 @@ type QueriedBookmark = {
 export class BookmarksRepository {
   constructor(private prisma: PrismaService) {}
 
-  private toResponseBookmarkDto(
-    bookmark: QueriedBookmark,
-  ): ResponseBookmarkDto {
+  private toResponseBookmarkDto(bookmark: QueriedBookmark): ResponseBookmarkDto {
     return {
       id: bookmark.id,
       userId: bookmark.userId,
@@ -59,10 +57,7 @@ export class BookmarksRepository {
     return landmarkExists;
   }
 
-  async findBookmarkById(
-    userId: string,
-    landmarkId: number,
-  ): Promise<Bookmark | null> {
+  async findBookmarkById(userId: string, landmarkId: number): Promise<Bookmark | null> {
     console.log(`userId: ${userId}, landmarkId: ${landmarkId}`);
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
@@ -74,10 +69,7 @@ export class BookmarksRepository {
     return bookmarkExists;
   }
 
-  async createBookmark(
-    userId: string,
-    landmarkId: number,
-  ): Promise<ResponseBookmarkDto> {
+  async createBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     const createdBookmark = await this.prisma.bookmark.create({
       data: {
         user: {
@@ -99,9 +91,33 @@ export class BookmarksRepository {
     return this.toResponseBookmarkDto(createdBookmark);
   }
 
-  async findManyByUser(
-    userId: string,
-  ): Promise<Record<string, ResponseBookmarkDto[]>> {
+  async findManyByUser(userId: string): Promise<ResponseBookmarkDto[]> {
+    const bookmarks = await this.prisma.bookmark.findMany({
+      where: { userId: userId },
+      include: {
+        landmark: {
+          select: {
+            id: true,
+            address: true,
+            name: true,
+            imagePath: true,
+            area: {
+              select: {
+                siDo: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const groupedBySiDo: ResponseBookmarkDto[] = [];
+    for (const bookmark of bookmarks) {
+      groupedBySiDo.push(this.toResponseBookmarkDto(bookmark));
+    }
+    return groupedBySiDo;
+  }
+
+  async findManyGroupedByUser(userId: string): Promise<Record<string, ResponseBookmarkDto[]>> {
     const bookmarks = await this.prisma.bookmark.findMany({
       where: { userId: userId },
       include: {

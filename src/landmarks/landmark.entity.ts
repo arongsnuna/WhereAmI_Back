@@ -5,7 +5,6 @@ export class LandmarkEntity {
   address: string;
   imagePath: string;
   fileName: string;
-  @Exclude()
   id: number;
   @Exclude()
   areaId: number;

@@ -6,8 +6,10 @@ import {
   PutObjectAclCommand,
   GetObjectAclOutput,
   GetObjectAclCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import * as mime from "mime";
 
 @Injectable()
 export class S3Service {
@@ -21,25 +23,77 @@ export class S3Service {
       region: this.configService.get<string>("AWS_REGION"),
       credentials: {
         accessKeyId: this.configService.get<string>("AWS_ACCESS_KEY_ID"),
-        secretAccessKey: this.configService.get<string>(
-          "AWS_SECRET_ACCESS_KEY",
-        ),
+        secretAccessKey: this.configService.get<string>("AWS_SECRET_ACCESS_KEY"),
       },
     });
   }
 
-  async uploadFile(fileName: string, fileBuffer: Buffer): Promise<string> {
+  async uploadFile(fileBuffer: Buffer, fileNameKey: string, folder: string = "User"): Promise<string> {
     const uploadCommand = new PutObjectCommand({
       Bucket: this.configService.get<string>("AWS_BUCKET_NAME"),
-      Key: `User/${fileName}`,
+      Key: `${folder}/${fileNameKey}`,
       Body: fileBuffer,
+      ACL: "public-read",
     });
 
     await this.s3.send(uploadCommand);
-
     const url = await getSignedUrl(this.s3, uploadCommand, { expiresIn: 3600 });
 
     return url;
+  }
+
+  // URL을 이용하여 삭제
+  async deleteFileByUrl(url: string): Promise<void> {
+    const parsedUrl = new URL(url);
+    const bucket = parsedUrl.hostname.split(".")[0];
+    const key = parsedUrl.pathname.substring(1); // 첫 번째 슬래시 제거
+    console.log("key:", key);
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    try {
+      await this.s3.send(deleteCommand);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      throw new Error("Failed to delete file");
+    }
+  }
+
+  // filkey를 이용하여 삭제
+  async deleteFile(fileNameKey: string): Promise<void> {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: this.configService.get<string>("AWS_BUCKET_NAME"),
+      Key: fileNameKey,
+    });
+
+    try {
+      await this.s3.send(deleteCommand);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      throw new Error("Failed to delete file");
+    }
+  }
+
+  // file name generate
+  generateUniqueFileName(originalName: string): string {
+    const timestamp = Date.now();
+    return `${timestamp}_${originalName}`;
+  }
+
+  // generateUniqueFileName(originalName: string): string {
+  //   const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  //   const extension = originalName.split(".").pop(); // 확장자 추출
+  //   const fileName = `${originalName}-${uniqueSuffix}.${extension}`;
+  //   return fileName;
+  // }
+
+  // file 유효성 검사
+  validateImageFile(originalName: string): boolean {
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/bmp", "image/gif", "image/webp"];
+    const mimeType = mime.getType(originalName);
+    return mimeType && allowedMimeTypes.includes(mimeType);
   }
 
   // CLI(액세스 제어 목록) Public Read 설정
@@ -53,6 +107,7 @@ export class S3Service {
     await this.s3.send(aclCommand);
   }
 
+  //ACL check
   async checkObjectAcl(imageKey: string): Promise<boolean> {
     console.log("imageKey: ", imageKey);
     const command = new GetObjectAclCommand({
@@ -62,14 +117,13 @@ export class S3Service {
 
     const result = await this.s3.send(command);
     const isPublicRead = (result as GetObjectAclOutput).Grants.some(
-      (grant) =>
-        grant.Permission === "READ" &&
-        grant.Grantee.URI === "http://acs.amazonaws.com/groups/global/AllUsers",
+      (grant) => grant.Permission === "READ" && grant.Grantee.URI === "http://acs.amazonaws.com/groups/global/AllUsers",
     );
 
     return isPublicRead;
   }
 
+  //ACL set : S3에 업로드된 이미지의 Public Read권한 주기
   async ensureImageIsPublic(imageKey: string): Promise<void> {
     const isPublicRead = await this.checkObjectAcl(imageKey);
 

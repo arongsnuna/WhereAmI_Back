@@ -1,7 +1,7 @@
 import { ConfigService } from "@nestjs/config";
 import { GetLandmarkDto } from "src/landmarks/dto/landmark.request.dto";
 
-//대표사진 경로
+//S3의 랜드마크 대표 이미지 imagePath 설정
 function getImagePath(configService: ConfigService, imageName: string): string {
   const bucketName = configService.get<string>("AWS_BUCKET_NAME");
   const region = configService.get<string>("AWS_REGION");
@@ -9,11 +9,8 @@ function getImagePath(configService: ConfigService, imageName: string): string {
   return imagePath;
 }
 
-//검색용 폴더
-function getUserImagePath(
-  configService: ConfigService,
-  getLandmarkDto: GetLandmarkDto,
-): string {
+//S3의 유저 프로필 이미지 imagePath 설정
+function getUserImagePath(configService: ConfigService, getLandmarkDto: GetLandmarkDto): string {
   const bucketName = configService.get<string>("AWS_BUCKET_NAME");
   const region = configService.get<string>("AWS_REGION");
   const fileName = encodeURIComponent(getLandmarkDto.name);

@@ -2,12 +2,14 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { BookmarksRepository } from "./bookmarks.repository";
 import { plainToClass } from "class-transformer";
-import { ResponseBookmarkDto, SiDoBookmarkListDto } from "./dto/bookmark.response.dto";
+import { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto } from "./dto/bookmark.response.dto";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 
 @Injectable()
 export class BookmarksService {
-  constructor(private bookmarksRepository: BookmarksRepository) {}
+  constructor(
+    private bookmarksRepository: BookmarksRepository, //private configService: ConfigService,
+  ) {}
 
   async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
     try {
@@ -24,8 +26,8 @@ export class BookmarksService {
       } else {
         // 북마크가 없으면 생성
         const landmark = await this.bookmarksRepository.findBookmarkByLandmarkId(landmarkId);
-
         const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
+        //bookmark.imagePath = getImagePath(this.configService, bookmark.imagePath);
         return plainToClass(ResponseBookmarkDto, bookmark);
       }
     } catch (error) {
@@ -34,8 +36,20 @@ export class BookmarksService {
     }
   }
 
-  async findBookmarksByUser(userId: string): Promise<SiDoBookmarkListDto[]> {
+  async getBookmarksByUserId(userId: string): Promise<BookmarklistDto[]> {
+    if (!userId) {
+      // 로그인하지 않은 사용자에 대한 처리: 빈 배열 반환
+      return [];
+    }
     const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+    if (!bookmarks) {
+      throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
+    }
+    return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
+  }
+
+  async findBookmarksByUser(userId: string): Promise<SiDoBookmarkListDto[]> {
+    const bookmarks = await this.bookmarksRepository.findManyGroupedByUser(userId);
     if (!bookmarks) {
       throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
     }
