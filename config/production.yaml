@@ -1,2 +1,10 @@
 db:
   synchronize: false
+
+server:
+  #host: "34.64.246.94"
+  port: 3000
+
+AiServer:
+  host: "34.64.246.94"
+  port: 5001

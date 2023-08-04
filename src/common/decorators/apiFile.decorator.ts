@@ -1,20 +1,20 @@
 // api-file.decorator.ts
-import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { applyDecorators } from "@nestjs/common";
+import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 
 export function ApiFile() {
   return applyDecorators(
     ApiBody({
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           file: {
-            type: 'string',
-            format: 'binary',
+            type: "string",
+            format: "binary",
           },
         },
       },
     }),
-    ApiConsumes('multipart/form-data'),
+    ApiConsumes("multipart/form-data"),
   );
 }
