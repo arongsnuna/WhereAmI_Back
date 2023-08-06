@@ -6,6 +6,7 @@ import { UsersRepository } from "../users/users.repository";
 import { Security } from "./auth.security";
 import { AuthRegisterResponseDto } from "./dto/auth.RegisterResponse.dto";
 import { User } from "@prisma/client";
+import { plainToClass } from "class-transformer";
 
 @Injectable()
 export class AuthService {
@@ -16,13 +17,9 @@ export class AuthService {
   ) {}
 
   //회원가입
-  register = async (
-    user: RegisterRequestDto,
-  ): Promise<AuthRegisterResponseDto> => {
+  register = async (user: RegisterRequestDto): Promise<AuthRegisterResponseDto> => {
     //이미 존재하는 유저인지 확인 [userRepo]
-    const existingUser = await this.userRepository.getUserByUserName(
-      user.userName,
-    );
+    const existingUser = await this.userRepository.getUserByUserName(user.userName);
     if (existingUser) {
       throw new UnauthorizedException("이미 존재하는 아이디 입니다.");
     }
@@ -44,36 +41,23 @@ export class AuthService {
     }
   };
 
-
   //로그인
-  async login(
-    loginRequestDto: LoginRequestDto,
-  ): Promise<{ accessToken: string }> {
+  async login(loginRequestDto: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(loginRequestDto);
+    console.log("user", user);
     if (user) {
       // 유저 토큰 생성 ( Secret + Payload )
       const payload = { userName: user.userName };
       const accessToken = this.jwtService.sign(payload);
-     
-      return { accessToken };
+      return plainToClass(AuthResponseDto, { ...user, accessToken });
     } else {
       throw new UnauthorizedException("login failed");
     }
   }
 
-  async validateUser(
-    loginRequestDto: LoginRequestDto,
-  ): Promise<LoginRequestDto | null> {
-    const user = await this.userRepository.getUserByUserName(
-      loginRequestDto.userName,
-    );
-    if (
-      user &&
-      (await this.security.comparePassword(
-        loginRequestDto.password,
-        user.password,
-      ))
-    ) {
+  async validateUser(loginRequestDto: LoginRequestDto): Promise<LoginRequestDto | null> {
+    const user = await this.userRepository.getUserByUserName(loginRequestDto.userName);
+    if (user && (await this.security.comparePassword(loginRequestDto.password, user.password))) {
       return user;
     }
     return null;

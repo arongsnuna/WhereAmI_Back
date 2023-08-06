@@ -74,4 +74,13 @@ class SiDoBookmarkListDto {
   bookmarks: ResponseBookmarkDto[];
 }
 
-export { ResponseBookmarkDto, SiDoBookmarkListDto };
+class BookmarklistDto {
+  @Expose()
+  @ApiProperty({
+    example: 1,
+    description: "랜드마크 ID",
+  })
+  landmarkId: number;
+}
+
+export { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto };

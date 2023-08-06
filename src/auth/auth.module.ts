@@ -12,7 +12,7 @@ import { PassportModule } from "@nestjs/passport";
 import * as Config from "config";
 import { LocalStrategy } from "./authentication/strategies/local.stategy";
 
-const time = (Config.get("jwt") as { expiresIn: number }).expiresIn;
+const time = (Config.get("JWT") as { expiresIn: number }).expiresIn;
 @Module({
   imports: [
     ConfigModule,
@@ -21,23 +21,14 @@ const time = (Config.get("jwt") as { expiresIn: number }).expiresIn;
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (
-        configService: ConfigService,
-      ): Promise<JwtModuleOptions> => ({
+      useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> => ({
         secret: configService.get<string>("JWT_SECRETKEY"),
         signOptions: { expiresIn: time },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UsersRepository,
-    PrismaService,
-    Security,
-    JwtStrategy,
-    LocalStrategy,
-  ],
+  providers: [AuthService, UsersRepository, PrismaService, Security, JwtStrategy, LocalStrategy, ConfigModule],
   exports: [LocalStrategy, JwtStrategy, PassportModule, JwtModule],
 })
 export class AuthModule {}

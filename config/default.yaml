@@ -11,8 +11,8 @@ AiServer:
   host: "127.0.0.1" #"localhost"
   port: 5001
 
-jwt:
+JWT:
   expiresIn: 36000 # 60 * 60s
 
-image:
+IMAGE:
   filesize: 5242880 # 5MB
