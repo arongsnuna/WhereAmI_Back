@@ -6,6 +6,7 @@ import { AuthModule } from "./auth/auth.module";
 import { ImagesModule } from "./images/images.module";
 import { UsersModule } from "./users/users.module";
 import { BookmarksModule } from "./bookmarks/bookmarks.module";
+import { SchedulersModule } from './schedulers/schedulers.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BookmarksModule } from "./bookmarks/bookmarks.module";
     ImagesModule,
     UsersModule,
     BookmarksModule,
+    SchedulersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

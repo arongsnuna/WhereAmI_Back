@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Bookmark, Prisma } from "@prisma/client";
+import { Bookmark } from "@prisma/client";
 import { PrismaService } from "src/prisma.service";
 import { ResponseBookmarkDto } from "./dto/bookmark.response.dto";
 
@@ -21,11 +21,7 @@ type QueriedBookmark = {
 export class BookmarksRepository {
   constructor(private prisma: PrismaService) {}
 
-  
-
-  private toResponseBookmarkDto(
-    bookmark: QueriedBookmark,
-  ): ResponseBookmarkDto {
+  private toResponseBookmarkDto(bookmark: QueriedBookmark): ResponseBookmarkDto {
     return {
       id: bookmark.id,
       userId: bookmark.userId,
@@ -37,33 +33,6 @@ export class BookmarksRepository {
       createdAt: bookmark.createdAt,
     };
   }
-
-  //북마크 존재하면 status update | 없다면 Insert
-  // async upsertBookmark(userId:string, landmarkId:number) {
-  //   const result = await this.prisma.bookmark.upsert({
-  //     where: {
-  //       userId: userId,
-  //       landmarkId: landmarkId,
-  //     },
-  //     update: {
-  //       status: true,
-  //     },
-  //     create: {
-  //       userId: userId,
-  //       landmarkId: landmarkId,
-  //       status: true,
-  //     },
-
-  //   })
-
-  //   return result
-  //}
-
-  
-
-
-  
-
 
   async findBookmarkByUserId(userId: string) {
     const userExists = await this.prisma.user.findUnique({
@@ -88,10 +57,7 @@ export class BookmarksRepository {
     return landmarkExists;
   }
 
-  async findBookmarkById(
-    userId: string,
-    landmarkId: number,
-  ): Promise<Bookmark | null> {
+  async findBookmarkById(userId: string, landmarkId: number): Promise<Bookmark | null> {
     console.log(`userId: ${userId}, landmarkId: ${landmarkId}`);
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
@@ -103,10 +69,7 @@ export class BookmarksRepository {
     return bookmarkExists;
   }
 
-  async createBookmark(
-    userId: string,
-    landmarkId: number,
-  ): Promise<ResponseBookmarkDto> {
+  async createBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     const createdBookmark = await this.prisma.bookmark.create({
       data: {
         user: {
@@ -128,10 +91,33 @@ export class BookmarksRepository {
     return this.toResponseBookmarkDto(createdBookmark);
   }
 
-  //북마크 불러오기
-  async findManyByUser(
-    userId: string,
-  ): Promise<Record<string, ResponseBookmarkDto[]>> {
+  async findManyByUser(userId: string): Promise<ResponseBookmarkDto[]> {
+    const bookmarks = await this.prisma.bookmark.findMany({
+      where: { userId: userId },
+      include: {
+        landmark: {
+          select: {
+            id: true,
+            address: true,
+            name: true,
+            imagePath: true,
+            area: {
+              select: {
+                siDo: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const groupedBySiDo: ResponseBookmarkDto[] = [];
+    for (const bookmark of bookmarks) {
+      groupedBySiDo.push(this.toResponseBookmarkDto(bookmark));
+    }
+    return groupedBySiDo;
+  }
+
+  async findManyGroupedByUser(userId: string): Promise<Record<string, ResponseBookmarkDto[]>> {
     const bookmarks = await this.prisma.bookmark.findMany({
       where: { userId: userId },
       include: {

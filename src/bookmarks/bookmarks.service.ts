@@ -2,47 +2,54 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { BookmarksRepository } from "./bookmarks.repository";
 import { plainToClass } from "class-transformer";
-import { ResponseBookmarkDto, SiDoBookmarkListDto } from "./dto/bookmark.response.dto";
+import { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto } from "./dto/bookmark.response.dto";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 
 @Injectable()
 export class BookmarksService {
-  constructor(private bookmarksRepository: BookmarksRepository) {}
+  constructor(
+    private bookmarksRepository: BookmarksRepository, //private configService: ConfigService,
+  ) {}
 
-  //북마크 추가 
-  // async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
-  //   try {
-  //     // 기존 북마크 찾기
-  //     // const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
+  async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
+    try {
+      // 기존 북마크 찾기
+      const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
 
-  //     // if (existingBookmark) {
-     
-  //     //   await this.bookmarksRepository.delete(existingBookmark.id);
+      if (existingBookmark) {
+        // 북마크가 이미 존재하면 삭제
+        await this.bookmarksRepository.delete(existingBookmark.id);
 
-  //     //   return {
-  //     //     message: `BookmarkId: ${existingBookmark.id} & landmarkId: ${landmarkId} deleted successfully`,
-  //     //   };
-  //     // } else {
-  //     //   // 북마크가 없으면 생성
-  //     //   const landmark = await this.bookmarksRepository.findBookmarkByLandmarkId(landmarkId);
+        return {
+          message: `BookmarkId: ${existingBookmark.id} & landmarkId: ${landmarkId} deleted successfully`,
+        };
+      } else {
+        // 북마크가 없으면 생성
+        const landmark = await this.bookmarksRepository.findBookmarkByLandmarkId(landmarkId);
+        const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
+        //bookmark.imagePath = getImagePath(this.configService, bookmark.imagePath);
+        return plainToClass(ResponseBookmarkDto, bookmark);
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 
-  //     //   const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
-  //     //   return plainToClass(ResponseBookmarkDto, bookmark);
-  //     // }
-
-  //      //북마크가 이미 존재하면 status update | 없다면 insert
-  //      const result = await this.bookmarksRepository.upsertBookmark(userId, landmarkId)
-
-  //      return plainToClass(ResponseBookmarkDto, result);
-
-  //   } catch (error) {
-  //     console.error(error);
-  //     throw error;
-  //   }
-  // }
+  async getBookmarksByUserId(userId: string): Promise<BookmarklistDto[]> {
+    if (!userId) {
+      // 로그인하지 않은 사용자에 대한 처리: 빈 배열 반환
+      return [];
+    }
+    const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+    if (!bookmarks) {
+      throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
+    }
+    return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
+  }
 
   async findBookmarksByUser(userId: string): Promise<SiDoBookmarkListDto[]> {
-    const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+    const bookmarks = await this.bookmarksRepository.findManyGroupedByUser(userId);
     if (!bookmarks) {
       throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
     }

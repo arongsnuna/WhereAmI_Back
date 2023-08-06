@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
   // payload에 있는 유저이름이 데이터베이스에 있는지 확인
-  async validate(payload): Promise<User | null> {
+  async validate(payload): Promise<User> {
     const { userName } = payload;
     console.log("username: ", userName);
     const user = await this.userRepository.getUserByUserName(userName);
@@ -27,6 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    return user || null;
+    return user;
   }
 }

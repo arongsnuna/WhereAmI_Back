@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Controller, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ImagesService } from "./images.service";
 import { memoryStorage } from "multer";
@@ -12,7 +7,7 @@ import LandmarkResponse from "src/docs/landmarks/landmarks.swagger";
 import * as Config from "config";
 import { LandmarkResponseDto } from "src/landmarks/dto/landmark.response.dto";
 
-const size = Config.get<{ filesize: number }>("image").filesize;
+const size = Config.get<{ filesize: number }>("IMAGE").filesize;
 @ApiTags("image")
 @Controller("image")
 export class ImagesController {
