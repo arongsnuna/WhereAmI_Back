@@ -46,9 +46,8 @@ export class BookmarksController {
   //   return this.bookmarksService.getBookmarksByUserId(userId);
   // }
 
-  @UseGuards(OptionalAuthGuard)
   @Get("/bookmarks")
-  //@UseGuards(AuthGuard())
+  @UseGuards(OptionalAuthGuard)
   async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
     console.log("req.user: ", req.user);
     const userId = req.user?.id;
@@ -56,8 +55,8 @@ export class BookmarksController {
   }
 
   //지역구별 리스트
-  @UseGuards(JwtAuthGuard)
   @Get("user/:userId")
+  @UseGuards(JwtAuthGuard)
   async findBookmarksByUser(@Param("userId") findBookmarkDto: FindBookmarkDto): Promise<SiDoBookmarkListDto[]> {
     const userId = findBookmarkDto.userId;
     return this.bookmarksService.findBookmarksByUser(userId);
@@ -72,6 +71,7 @@ export class BookmarksController {
 
   //유저의 랜드마크 아이디로 조회
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createBookmark(
     @Request() req: any,
     @Body(ValidationPipe) createBookmarkDto: CreateBookmarkDto,
@@ -82,6 +82,7 @@ export class BookmarksController {
   }
 
   @Delete(":landmarkId")
+  @UseGuards(JwtAuthGuard)
   async deleteBookmark(
     @Request() req: any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,
