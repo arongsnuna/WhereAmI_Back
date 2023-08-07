@@ -11,6 +11,7 @@ import {
   ValidationPipe,
   Get,
   BadRequestException,
+  Req,
 } from "@nestjs/common";
 import { BookmarksService } from "./bookmarks.service";
 
@@ -46,21 +47,14 @@ export class BookmarksController {
   //   return this.bookmarksService.getBookmarksByUserId(userId);
   // }
 
-  @Get("/bookmarks")
-  @UseGuards(OptionalAuthGuard)
-  async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
-    console.log("req.user: ", req.user);
-    const userId = req.user?.id;
-    return this.bookmarksService.getBookmarksByUserId(userId);
-  }
+  // @Get("/bookmarks")
+  // @UseGuards(OptionalAuthGuard)
+  // async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
+  //   console.log("req.user: ", req.user);
+  //   const userId = req.user?.id;
+  //   return this.bookmarksService.getBookmarksByUserId(userId);
+  // }
 
-  //지역구별 리스트
-  @Get("user/:userId")
-  @UseGuards(JwtAuthGuard)
-  async findBookmarksByUser(@Param("userId") findBookmarkDto: FindBookmarkDto): Promise<SiDoBookmarkListDto[]> {
-    const userId = findBookmarkDto.userId;
-    return this.bookmarksService.findBookmarksByUser(userId);
-  }
 
   // 북마크 아이디로 1개 조회
   @Get(":id")
@@ -92,11 +86,20 @@ export class BookmarksController {
     return message;
   }
 
-  @Get("user/:userId/landmark/:landmarkId")
+  @Get(":landmarkId")
   async findOneByUserAndLandmark(
-    @Param("userId") userId: string,
+    @Req() req:any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,
   ): Promise<ResponseBookmarkDto> {
+    const userId = req.user.id;
     return this.bookmarksService.findOneByUserAndLandmark(userId, landmarkId);
+  }
+
+  //지역구별 리스트
+  @Get("/user")
+  @UseGuards(JwtAuthGuard)
+  async findBookmarksByUser(@Request() req: any): Promise<SiDoBookmarkListDto[]> {
+    const userId = req.user.id;
+    return this.bookmarksService.findBookmarksByUser(userId);
   }
 }
