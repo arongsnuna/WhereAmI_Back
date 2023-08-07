@@ -29,9 +29,6 @@ class GetSchedulesResponseDto {
     @ApiProperty()
     @Exclude()
     userId: string;
-
-
-    
 }
 
 export { GetSchedulesResponseDto };
