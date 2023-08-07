@@ -45,6 +45,7 @@ model User {
   deletedAt DateTime? @map("deleted_at") @db.Timestamp()
 
   bookmarks Bookmark[]
+  scheduler Scheduler[]
 }
 
 //Bookmark 모델
@@ -57,4 +58,16 @@ model Bookmark {
 
   landmark Landmark @relation(fields: [landmarkId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
+}
+
+//Schedule 모델
+model Scheduler {
+  id        Int       @id @default(autoincrement()) @map("scheduler_id")
+  title     String 
+  startDate DateTime  @db.Timestamp()
+  endDate   DateTime  @db.Timestamp()
+  schedule  String[]
+  userId    String    @map("user_id")
+
+  user      User      @relation(fields: [userId], references: [id])
 }
