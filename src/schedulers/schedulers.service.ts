@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest } from "openai"; // OpenAI SDK 임포트
-import { lastValueFrom } from "rxjs";
+import { GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
+import { SchedulersRepository } from './schedulers.repository';
 
 @Injectable()
 export class SchedulersService {
   private openai: OpenAIApi;
+  private readonly schedulersRepository : SchedulersRepository
 
   constructor() {
     const configuration = new Configuration({
@@ -13,6 +15,7 @@ export class SchedulersService {
     this.openai = new OpenAIApi(configuration);
   }
 
+  //일정 생성 & 저장
   async askGpt(prompt: string): Promise<string> {
     const maxRetries = 2; // 최대 재시도 횟수 (429 에러 발생시)
     const delay = 5000; // 재시도 사이의 대기 시간 (밀리초)
@@ -47,5 +50,12 @@ export class SchedulersService {
     }
 
     throw new Error("Failed to create travel plan after retries"); // 재시도 후에도 실패한 경우
+  }
+
+  //일정 리스트 불러오기
+  async getScheduleList(id: string): Promise<GetSchedulesResponseDto[]>{
+    const scheduleList = await this.schedulersRepository.getScheduleList(id);
+
+    return scheduleList;
   }
 }

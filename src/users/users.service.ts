@@ -69,8 +69,8 @@ export class UsersService {
     return { message: "계정을 성공적으로 삭제하였습니다." };
   }
 
-  //현재 로그인한 사용자 정보 가져오기
-  async getCurrentUser(userId: string): Promise<User | null> {
+   //현재 로그인한 사용자 정보 가져오기
+   async getCurrentUser(userId: string): Promise<User | null> {
     const result = await this.userRepo.getCurrentUser(userId);
     console.log(result);
 
@@ -79,19 +79,7 @@ export class UsersService {
       throw new Error();
     }
 
+    return result;
+  }
 
-    //현재 로그인한 사용자 정보 가져오기
-    async getCurrentUser(id: string): Promise<User | null> {
-      const result = await this.userRepo.getCurrentUser(id);
-      console.log(result)
-      
-      if (!result) {
-        // 사용자를 찾지 못한 경우에 대한 처리를 여기에 추가합니다.
-        throw new Error();
-      }
-    
-      return result;
-    }
-    
-    
-    }
+}

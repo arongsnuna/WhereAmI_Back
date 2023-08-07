@@ -91,10 +91,10 @@ export class BookmarksService {
     return { message: `landmarkId: ${landmarkId} deleted successfully` };
   }
 
-  async findOneByUserAndLandmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
-    const bookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
+  async findOneByUserAndLandmark(userId:string, landmarkId: number): Promise<ResponseBookmarkDto> {
+    const bookmark = await this.bookmarksRepository.findBookmarkById(userId,landmarkId);
     if (!bookmark) {
-      throw new NotFoundException(`Bookmark with user id ${userId} and landmark id ${landmarkId} not found`);
+      throw new NotFoundException(`Bookmark withlandmark id ${landmarkId} not found`);
     }
     return plainToClass(ResponseBookmarkDto, bookmark);
   }
