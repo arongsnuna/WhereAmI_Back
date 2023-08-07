@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { S3Service } from "src/common/s3/s3.service";
-import { UsersRepository } from "./users.repository";
-import { myPageResponseDto, myPageBookmarkResponseDto } from "./dto/users.response.dto";
-import { plainToClass } from "class-transformer";
-import { MessageResponseDto } from "../common/dto/message.dto";
-import { User } from "@prisma/client";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { S3Service } from 'src/common/s3/s3.service';
+import { UsersRepository } from './users.repository';
+import { myPageResponseDto,myPageBookmarkResponseDto } from './dto/users.response.dto';
+import { plainToClass } from 'class-transformer';
+import { MessageResponseDto } from '../common/dto/message.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -79,6 +79,19 @@ export class UsersService {
       throw new Error();
     }
 
-    return result;
-  }
-}
+
+    //현재 로그인한 사용자 정보 가져오기
+    async getCurrentUser(id: string): Promise<User | null> {
+      const result = await this.userRepo.getCurrentUser(id);
+      console.log(result)
+      
+      if (!result) {
+        // 사용자를 찾지 못한 경우에 대한 처리를 여기에 추가합니다.
+        throw new Error();
+      }
+    
+      return result;
+    }
+    
+    
+    }

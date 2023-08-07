@@ -106,11 +106,12 @@ export class UsersRepository {
   }
 
   //현재 로그인한 사용자 정보 가져오기
-  async getCurrentUser(id: string): Promise<User | null> {
+  async getCurrentUser (id: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
-      where: {
-        id,
-      },
+      where:  {
+        id
+      } 
     });
-  }
 }
+
+  }
