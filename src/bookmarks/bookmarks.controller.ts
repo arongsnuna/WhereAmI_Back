@@ -38,31 +38,6 @@ export class BookmarksController {
     return this.bookmarksService.toggleBookmark(userId, landmarkId);
   }
 
-  // 서버 코드
-
-  // @Get('/bookmarks')
-  // @UseGuards(OptionalAuthGuard) // <--- 여기서 OptionalAuthGuard를 사용합니다
-  // async getUserBookmarks(@Request() req: any): Promise<BookmarkDto[]> {
-  //   const userId = req.user?.id; // 로그인되지 않은 사용자의 경우 user가 undefined일 수 있음
-  //   return this.bookmarksService.getBookmarksByUserId(userId);
-  // }
-
-  // @Get("/bookmarks")
-  // @UseGuards(OptionalAuthGuard)
-  // async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
-  //   console.log("req.user: ", req.user);
-  //   const userId = req.user?.id;
-  //   return this.bookmarksService.getBookmarksByUserId(userId);
-  // }
-
-
-  // 북마크 아이디로 1개 조회
-  @Get(":id")
-  get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
-    console.log("typeof id: ", typeof id);
-    return this.bookmarksService.findOne(id);
-  }
-
   //유저의 랜드마크 아이디로 조회
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -87,6 +62,7 @@ export class BookmarksController {
   }
 
   @Get(":landmarkId")
+  @UseGuards(JwtAuthGuard)
   async findOneByUserAndLandmark(
     @Req() req:any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,
