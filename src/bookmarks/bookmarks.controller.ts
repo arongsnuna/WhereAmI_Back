@@ -11,6 +11,7 @@ import {
   ValidationPipe,
   Get,
   BadRequestException,
+  Req,
 } from "@nestjs/common";
 import { BookmarksService } from "./bookmarks.service";
 

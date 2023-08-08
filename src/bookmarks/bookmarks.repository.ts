@@ -50,8 +50,8 @@ export class BookmarksRepository {
     return landmark;
   }
 
-  async findBookmarkById(userId: string, landmarkId: number): Promise<Bookmark | null> {
-    console.log(`userId: ${userId}, landmarkId: ${landmarkId}`);
+  async findBookmarkById(userId:string, landmarkId: number): Promise<Bookmark | null> {
+    console.log(`landmarkId: ${landmarkId}`);
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
         userId: userId,
