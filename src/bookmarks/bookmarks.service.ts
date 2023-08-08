@@ -58,8 +58,14 @@ export class BookmarksService {
 
   async create(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     try {
-      await this.bookmarksRepository.findBookmarkByUserId(userId);
-      await this.bookmarksRepository.findBookmarkByLandmarkId(landmarkId);
+      const userExists = await this.bookmarksRepository.findBookmarkByUserId(userId);
+      if (!userExists) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+      const landmarkExists = await this.bookmarksRepository.findBookmarkByLandmarkId(landmarkId);
+      if (!landmarkExists) {
+        throw new NotFoundException(`Landmark with id ${landmarkId} not found`);
+      }
       const findBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
 
       if (findBookmark) {

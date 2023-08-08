@@ -35,26 +35,19 @@ export class BookmarksRepository {
   }
 
   async findBookmarkByUserId(userId: string) {
-    const userExists = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
 
-    if (!userExists) {
-      throw new NotFoundException(`User with id ${userId} not found`);
-    }
-
-    return userExists;
+    return user;
   }
 
   async findBookmarkByLandmarkId(landmarkId: number) {
-    const landmarkExists = await this.prisma.landmark.findUnique({
+    const landmark = await this.prisma.landmark.findUnique({
       where: { id: landmarkId },
     });
 
-    if (!landmarkExists) {
-      throw new NotFoundException(`Landmark with id ${landmarkId} not found`);
-    }
-    return landmarkExists;
+    return landmark;
   }
 
   async findBookmarkById(userId:string, landmarkId: number): Promise<Bookmark | null> {
