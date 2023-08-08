@@ -55,19 +55,29 @@ export class BookmarksController {
   }
 
   //지역구별 리스트
-  @Get("user/:userId")
+  @Get("/user")
   @UseGuards(JwtAuthGuard)
-  async findBookmarksByUser(@Param("userId") findBookmarkDto: FindBookmarkDto): Promise<SiDoBookmarkListDto[]> {
-    const userId = findBookmarkDto.userId;
+  async findBookmarksByUser(@Request() req: any): Promise<SiDoBookmarkListDto[]> {
+    const userId = req.user.id;
     return this.bookmarksService.findBookmarksByUser(userId);
   }
 
-  // 북마크 아이디로 1개 조회
-  @Get(":id")
-  get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
-    console.log("typeof id: ", typeof id);
-    return this.bookmarksService.findOne(id);
+  @Get(":landmarkId")
+  @UseGuards(JwtAuthGuard)
+  async findOneByUserAndLandmark(
+    @Request() req: any,
+    @Param("landmarkId", ParseIntPipe) landmarkId: number,
+  ): Promise<ResponseBookmarkDto> {
+    const userId = req.user.id;
+    return this.bookmarksService.findOneByUserAndLandmark(userId, landmarkId);
   }
+
+  // 북마크 아이디로 1개 조회
+  // @Get(":id")
+  // get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
+  //   console.log("typeof id: ", typeof id);
+  //   return this.bookmarksService.findOne(id);
+  // }
 
   //유저의 랜드마크 아이디로 조회
   @Post()
@@ -90,13 +100,5 @@ export class BookmarksController {
     const userId = req.user.id; // 로그인된 사용자의 ID
     const message = this.bookmarksService.delete(userId, landmarkId);
     return message;
-  }
-
-  @Get("user/:userId/landmark/:landmarkId")
-  async findOneByUserAndLandmark(
-    @Param("userId") userId: string,
-    @Param("landmarkId", ParseIntPipe) landmarkId: number,
-  ): Promise<ResponseBookmarkDto> {
-    return this.bookmarksService.findOneByUserAndLandmark(userId, landmarkId);
   }
 }

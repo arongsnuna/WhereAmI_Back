@@ -12,7 +12,7 @@ AiServer:
   port: 5001
 
 JWT:
-  expiresIn: 36000 # 60 * 60s
+  expiresIn: 36000 # 10 * 60 * 60s : 10h
 
 IMAGE:
   filesize: 5242880 # 5MB

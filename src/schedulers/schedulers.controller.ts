@@ -1,6 +1,8 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { SchedulersService } from "./schedulers.service";
+import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 
+@UseGuards(JwtAuthGuard)
 @Controller("schedule")
 export class SchedulersController {
   constructor(private readonly gptService: SchedulersService) {}

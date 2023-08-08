@@ -27,7 +27,7 @@ export class LandmarkResponseDto {
   @Expose()
   imagePath: string;
 
-  @Exclude()
+  @Expose()
   @IsInt()
   id: number;
 
