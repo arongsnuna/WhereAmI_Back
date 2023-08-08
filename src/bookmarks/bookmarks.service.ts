@@ -11,14 +11,13 @@ export class BookmarksService {
     private bookmarksRepository: BookmarksRepository, //private configService: ConfigService,
   ) {}
 
-  //북마크 추가 
+  //북마크 추가
   async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
     try {
       // 기존 북마크 찾기
       const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
 
       if (existingBookmark) {
-     
         await this.bookmarksRepository.delete(existingBookmark.id);
 
         return {
@@ -29,8 +28,7 @@ export class BookmarksService {
         const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
         return plainToClass(ResponseBookmarkDto, bookmark);
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error(error);
       throw error;
     }
@@ -97,11 +95,23 @@ export class BookmarksService {
     return { message: `landmarkId: ${landmarkId} deleted successfully` };
   }
 
-  async findOneByUserAndLandmark(userId:string, landmarkId: number): Promise<ResponseBookmarkDto> {
-    const bookmark = await this.bookmarksRepository.findBookmarkById(userId,landmarkId);
+  async findOneByUserAndLandmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
+    const bookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
     if (!bookmark) {
       throw new NotFoundException(`Bookmark withlandmark id ${landmarkId} not found`);
     }
     return plainToClass(ResponseBookmarkDto, bookmark);
+  }
+
+  async getBookmarksByUserId(userId: string): Promise<BookmarklistDto[]> {
+    if (!userId) {
+      // 로그인하지 않은 사용자에 대한 처리: 빈 배열 반환
+      return [];
+    }
+    const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+    if (!bookmarks) {
+      throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
+    }
+    return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
   }
 }

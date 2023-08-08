@@ -3,32 +3,60 @@ import { Exclude } from "class-transformer";
 import { IsInt, IsString } from "class-validator";
 
 class GetSchedulesResponseDto {
-    @ApiProperty()
-    @IsInt()
-    id: number;
+  @ApiProperty()
+  @IsInt()
+  id: number;
 
-    @ApiProperty()
-    @IsString()
-    title: string;
+  @ApiProperty()
+  @IsString()
+  title: string;
 
-    // @ApiProperty()
-    // imagePath : string;
+  // @ApiProperty()
+  // imagePath : string;
 
-    @ApiProperty()
-    @Exclude()
-    startDate: Date;
+  @ApiProperty()
+  @Exclude()
+  startDate: Date;
 
-    @ApiProperty()
-    @Exclude()
-    endDate: Date;
+  @ApiProperty()
+  @Exclude()
+  endDate: Date;
 
-    @ApiProperty()
-    @Exclude()
-    schedule: string[];
+  @ApiProperty()
+  @Exclude()
+  schedule: string[];
 
-    @ApiProperty()
-    @Exclude()
-    userId: string;
+  @ApiProperty()
+  @Exclude()
+  userId: string;
 }
 
-export { GetSchedulesResponseDto };
+class CreateSchedulesResponseDto {
+  @ApiProperty()
+  @IsInt()
+  id: number;
+
+  @ApiProperty()
+  @IsString()
+  title: string;
+
+  @ApiProperty()
+  schedule: string[];
+
+  // @ApiProperty()
+  // imagePath : string;
+
+  @ApiProperty()
+  @Exclude()
+  startDate: Date;
+
+  @ApiProperty()
+  @Exclude()
+  endDate: Date;
+
+  @ApiProperty()
+  @Exclude()
+  userId: string;
+}
+
+export { GetSchedulesResponseDto, CreateSchedulesResponseDto };
