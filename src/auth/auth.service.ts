@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AuthResponseDto } from "./dto/auth.response.dto";
 import { LoginRequestDto, RegisterRequestDto } from "./dto/auth.request.dto";
@@ -21,7 +21,7 @@ export class AuthService {
     //이미 존재하는 유저인지 확인 [userRepo]
     const existingUser = await this.userRepository.getUserByUserName(user.userName);
     if (existingUser) {
-      throw new UnauthorizedException("이미 존재하는 아이디 입니다.");
+      throw new ConflictException("이미 존재하는 아이디 입니다.");
     }
 
     try {

@@ -11,12 +11,12 @@ export class BookmarksService {
     private bookmarksRepository: BookmarksRepository, //private configService: ConfigService,
   ) {}
 
-  //북마크 추가
+  //북마크 토글 (추가 | 취소)
   async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
     try {
-      // 기존 북마크 찾기
-      const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
 
+      // 북마크 취소
+      const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
       if (existingBookmark) {
         await this.bookmarksRepository.delete(existingBookmark.id);
 
@@ -24,36 +24,49 @@ export class BookmarksService {
           message: `BookmarkId: ${existingBookmark.id} & landmarkId: ${landmarkId} deleted successfully`,
         };
       } else {
-        // 북마크가 없으면 생성
+        // 북마크가 없으면 추가
         const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
         return plainToClass(ResponseBookmarkDto, bookmark);
       }
-    } catch (error) {
-      console.error(error);
-      throw error;
+    } 
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
     }
   }
 
+  //userId로 북마크 리스트 불러오기
   async findBookmarksByUser(userId: string): Promise<SiDoBookmarkListDto[]> {
-    const bookmarks = await this.bookmarksRepository.findManyGroupedByUser(userId);
-    if (!bookmarks) {
-      throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
+    try {
+      const bookmarks = await this.bookmarksRepository.findManyGroupedByUser(userId);
+      if (!bookmarks) {
+        throw new NotFoundException("해당 유저에 대한 북마크를 불러올 수 없습니다.");
+      }
+      return Object.entries(bookmarks).map(([siDo, bookmarksList]) => ({
+        siDo,
+        bookmarks: bookmarksList.map((bookmark) => plainToClass(ResponseBookmarkDto, bookmark)),
+      }));
     }
-    return Object.entries(bookmarks).map(([siDo, bookmarksList]) => ({
-      siDo,
-      bookmarks: bookmarksList.map((bookmark) => plainToClass(ResponseBookmarkDto, bookmark)),
-    }));
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 
+  //bookmarkId로 불러오기
   async findOne(id: number): Promise<ResponseBookmarkDto> {
-    const bookmark = await this.bookmarksRepository.findOne(id);
-    console.log("bookmark: ", bookmark);
-    if (!bookmark) {
-      throw new NotFoundException(`Bookmark with id ${id} not found`);
+    try {
+      const bookmark = await this.bookmarksRepository.findOne(id);
+      if (!bookmark) {
+        throw new NotFoundException(`해당 북마크(${id})를 불러올 수 없습니다.`);
+      }
+
+      return plainToClass(ResponseBookmarkDto, bookmark);
     }
-    return plainToClass(ResponseBookmarkDto, bookmark);
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    }
   }
 
+  //실제 사용 X api
   async create(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     try {
       const userExists = await this.bookmarksRepository.findBookmarkByUserId(userId);
@@ -74,11 +87,11 @@ export class BookmarksService {
 
       return plainToClass(ResponseBookmarkDto, createBookmark);
     } catch (error) {
-      console.error(error);
-      throw error;
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
     }
   }
 
+  //실제 사용 x api
   async delete(userId: string, landmarkId: number): Promise<null | MessageResponseDto> {
     console.log("id: ", landmarkId);
     const bookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
@@ -95,6 +108,7 @@ export class BookmarksService {
     return { message: `landmarkId: ${landmarkId} deleted successfully` };
   }
 
+  //실제 사용 x api
   async findOneByUserAndLandmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     const bookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
     if (!bookmark) {
@@ -103,15 +117,18 @@ export class BookmarksService {
     return plainToClass(ResponseBookmarkDto, bookmark);
   }
 
+  //북마크 페이지 - userId로 북마크 불러오기
   async getBookmarksByUserId(userId: string): Promise<BookmarklistDto[]> {
-    if (!userId) {
-      // 로그인하지 않은 사용자에 대한 처리: 빈 배열 반환
-      return [];
+    try {
+      if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+
+      const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+  
+      return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
     }
-    const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
-    if (!bookmarks) {
-      throw new NotFoundException(`Bookmarks with user id ${userId} not found`);
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
     }
-    return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
+    
   }
 }
