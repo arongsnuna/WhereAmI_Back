@@ -62,7 +62,7 @@ export class SchedulersService {
       const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, dateArray, userId);
       return scheduleList;
     } catch (error: any) {
-      if (error.response.status === 429) {
+      if (error && error.response && error.response.status === 429) {
         // 429 오류
         throw new Error("Failed to create travel plan (429 error)");
       } else {
@@ -78,7 +78,10 @@ export class SchedulersService {
     const resultList: GetScheduleListResponseDto[] = [];
 
     for (const schedule of scheduleList) {
-      const imagePath = schedule[0]["imagePath"];
+      const firstSchedule = schedule.schedule[0];
+      const firstDate = Object.keys(firstSchedule)[0];
+      const imagePath = firstSchedule[firstDate][0].imagePath;
+      console.log("imagePath:", imagePath )
       const title = schedule["title"];
       const schedulerId = schedule["id"];
 

@@ -40,7 +40,7 @@ class GetScheduleListResponseDto {
 
   @ApiProperty()
   @IsString()
-  imagePath: string;
+  imagePath: any;
 }
 
 class CreateSchedulesResponseDto {
