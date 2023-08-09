@@ -21,15 +21,6 @@ export class LandmarkService {
     if (!landmark) {
       throw new Error("Landmark not found");
     }
-    // DB imagePath 업데이트
-    // if (landmark.fileName == landmark.imagePath) {
-    //   // S3 Public권한 주기, imagePath 설정하기
-    //   await this.s3Service.ensureImageIsPublic(landmark.fileName);
-    //   landmark.imagePath = getImagePath(this.configService, landmark.imagePath);
-    //   // DB imagePath 업데이트
-    //   const updateLandmark = await this.landmarkRepo.updateImagePath(landmark.name, landmark.imagePath);
-    //   landmark = updateLandmark;
-    // }
 
     // S3 Public권한 주기
     await this.s3Service.ensureImageIsPublic(landmark.fileName);
@@ -47,16 +38,6 @@ export class LandmarkService {
     //파일명 이름으로이미지 경로 업데이트
     const updatedLandmarksPromises = landmarks.map(async (landmark) => {
       try {
-        // DB imagePath 업데이트
-        // if (landmark.fileName == landmark.imagePath) {
-        //   // S3 Public권한 주기, imagePath 설정하기
-        //   await this.s3Service.ensureImageIsPublic(landmark.fileName);
-        //   landmark.imagePath = getImagePath(this.configService, landmark.imagePath);
-        //   // DB imagePath 업데이트
-        //   const updateLandmark = await this.landmarkRepo.updateImagePath(landmark.name, landmark.imagePath);
-        //   landmark = updateLandmark;
-        // }
-
         // S3 Public권한 주기
         await this.s3Service.ensureImageIsPublic(landmark.fileName);
 

@@ -21,9 +21,7 @@ export class S3Service {
       region: this.configService.get<string>("AWS_REGION"),
       credentials: {
         accessKeyId: this.configService.get<string>("AWS_ACCESS_KEY_ID"),
-        secretAccessKey: this.configService.get<string>(
-          "AWS_SECRET_ACCESS_KEY",
-        ),
+        secretAccessKey: this.configService.get<string>("AWS_SECRET_ACCESS_KEY"),
       },
     });
   }
@@ -44,6 +42,7 @@ export class S3Service {
 
   // CLI(액세스 제어 목록) Public Read 설정
   async updateImageAcl(imageKey: string): Promise<void> {
+    console.log("ACL Public-read: ", imageKey);
     const aclCommand = new PutObjectAclCommand({
       Bucket: this.configService.get<string>("AWS_BUCKET_NAME"),
       Key: imageKey,
@@ -54,7 +53,6 @@ export class S3Service {
   }
 
   async checkObjectAcl(imageKey: string): Promise<boolean> {
-    console.log("imageKey: ", imageKey);
     const command = new GetObjectAclCommand({
       Bucket: this.configService.get<string>("AWS_BUCKET_NAME"),
       Key: imageKey,
@@ -62,9 +60,7 @@ export class S3Service {
 
     const result = await this.s3.send(command);
     const isPublicRead = (result as GetObjectAclOutput).Grants.some(
-      (grant) =>
-        grant.Permission === "READ" &&
-        grant.Grantee.URI === "http://acs.amazonaws.com/groups/global/AllUsers",
+      (grant) => grant.Permission === "READ" && grant.Grantee.URI === "http://acs.amazonaws.com/groups/global/AllUsers",
     );
 
     return isPublicRead;
