@@ -9,6 +9,9 @@ import {
 import { SchedulersRepository } from "./schedulers.repository";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
+import { LandmarkRepository } from "src/landmarks/landmarks.repository";
+import { GetLandmarkDto } from "src/landmarks/dto/landmark.request.dto";
+import { LandmarkService } from "src/landmarks/landmarks.service";
 
 enum ChatCompletionRequestMessageRoleEnum {
   USER = "user",
@@ -20,7 +23,11 @@ enum ChatCompletionRequestMessageRoleEnum {
 export class SchedulersService {
   private openai: OpenAIApi;
 
-  constructor(private readonly schedulersRepository: SchedulersRepository) {
+  constructor(
+    private readonly schedulersRepository: SchedulersRepository,
+    private readonly landmarkRepository: LandmarkRepository,
+    private readonly landmarkService: LandmarkService,
+  ) {
     const configuration = new Configuration({
       apiKey: process.env.GPT_SECRETKEY,
     });
@@ -32,9 +39,20 @@ export class SchedulersService {
     const maxRetries = 2; // 최대 재시도 횟수 (429 에러 발생시)
     const delay = 5000; // 재시도 사이의 대기 시간 (밀리초)
     const date = createScheduleRequestDto.date;
-    const place = createScheduleRequestDto.place;
     const title = createScheduleRequestDto.title;
     const userId = createScheduleRequestDto.userId;
+    const place = createScheduleRequestDto.place;
+    const placeArray = place.split(",").map((d) => d.trim());
+
+    const imagePaths = await Promise.all(
+      placeArray.map(async (placeName) => {
+        const getLandmarkDto = new GetLandmarkDto(placeName);
+        const landmark = await this.landmarkService.getLandmarkByName(getLandmarkDto);
+        return landmark.imagePath; // imagePath만 반환합니다.
+      }),
+    );
+    console.log("imagePaths: ", imagePaths);
+    //const imagePath = await this.landmarkRepository.findLandmarkByName(placeArray);
     const inputdata = `[${date}] [${place}]`;
 
     const message: ChatCompletionRequestMessage[] = [
@@ -89,9 +107,16 @@ export class SchedulersService {
     for (let i = 0; i < maxRetries; i++) {
       try {
         const scheduledata = await this.openai.createChatCompletion(chatCompletionRequest);
-        console.log("completion: ", scheduledata.data.choices[0].message.content); // GPT 출력 결과 메세지
-        //const scheduleData = schedule.data.choices[0].message.content.map((msg) => msg.content);
         const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
+
+        let index = 0;
+        // JSON 데이터의 각 날짜를 순회
+        Object.values(schedule).forEach((dateArray: any[]) => {
+          dateArray.forEach((item) => {
+            item.imagePath = imagePaths[index];
+            index++;
+          });
+        });
 
         const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, date, userId);
         return scheduleList;
