@@ -35,7 +35,7 @@ export class LandmarkResponseDto {
   @IsString()
   fileName: string;
 
-  @Exclude()
+  @Expose()
   @IsInt()
   areaId: number;
 }

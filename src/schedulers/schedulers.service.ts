@@ -1,7 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage } from "openai"; // OpenAI SDK 임포트
 import { lastValueFrom } from "rxjs";
-import { CreateSchedulesResponseDto, GetScheduleListResponseDto, GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
+import {
+  CreateSchedulesResponseDto,
+  GetScheduleListResponseDto,
+  GetSchedulesResponseDto,
+} from "./dto/schedulers.response.dto";
 import { SchedulersRepository } from "./schedulers.repository";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
@@ -70,7 +74,8 @@ export class SchedulersService {
           "6. I need to send it in 'json' format, Please take the form of 'json' including the field, take the form The output json form is as follows: '{{'date': {{ 'name': , 'time':, 'address':, 'description':, 'recommendPlace':, 'distance':, 'duration':, 'transportation': }} }}' \n" +
           "7. The travel itinerary should be appropriately scheduled over the given duration. Moreover, the sequence should be arranged in the order of the closest proximity between places. As a result, it needs to be calculated based on the 'distance' and 'duration' between the subsequent locations. Once again, please adhere to the numbered instructions above. Calculate the distance and time between the places accurately. \n" +
           "8. You must respond in 'Korean' and You can only answer in the above json format. \n" +
-          "9. 위의 1부터 8번호까지 지시 사항들을 모두 꼭 지켜서 만들어줘 '한글로 답변' 해야하고 그리고 출력은 'The output json form is as follows:'에서 명시한 json포맷으로 보내야하기때문에 형태가 달라지면 안돼 \n",
+          "9. you must include over one place everyday. Also, utilize only the places which are written in format [place] and make use the places only one time at a schedule.\n" +
+          "10. 위의 1부터 8번호까지 지시 사항들을 모두 꼭 지켜서 만들어줘 '한글로 답변' 해야하고 그리고 출력은 'The output json form is as follows:'에서 명시한 json포맷으로 보내야하기때문에 형태가 달라지면 안돼 \n",
       },
     ];
 
@@ -110,24 +115,23 @@ export class SchedulersService {
 
   //해당 유저의 일정 리스트 불러오기
   async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
-
     const scheduleList = await this.schedulersRepository.getScheduleList(id);
 
     const resultList: GetScheduleListResponseDto[] = [];
 
     for (const schedule of scheduleList) {
-      const imagePath = schedule[0]['imagePath'];
-      const title = schedule['title'];
-      const schedulerId = schedule['id'];
+      const imagePath = schedule[0]["imagePath"];
+      const title = schedule["title"];
+      const schedulerId = schedule["id"];
 
-        // 각 일정의 imagePath와 title을 이용하여 GetScheduleListResponseDto 생성
-        const responseDto: GetScheduleListResponseDto = {
-          schedulerId,
-          imagePath,
-          title,
-        };
+      // 각 일정의 imagePath와 title을 이용하여 GetScheduleListResponseDto 생성
+      const responseDto: GetScheduleListResponseDto = {
+        schedulerId,
+        imagePath,
+        title,
+      };
 
-        resultList.push(responseDto);
+      resultList.push(responseDto);
     }
 
     return resultList;
