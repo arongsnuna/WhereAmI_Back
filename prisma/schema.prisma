@@ -66,7 +66,7 @@ model Scheduler {
   title     String 
   startDate DateTime  @db.Timestamp() @map("start_date")
   endDate   DateTime  @db.Timestamp() @map("end_date")
-  schedule  String[]
+  schedule  Json[]
   userId    String    @map("user_id")
 
   user      User      @relation(fields: [userId], references: [id])

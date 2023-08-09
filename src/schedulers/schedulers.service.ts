@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage } from "openai"; // OpenAI SDK 임포트
 import { lastValueFrom } from "rxjs";
-import { CreateSchedulesResponseDto, GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
+import { CreateSchedulesResponseDto, GetScheduleListResponseDto, GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
 import { SchedulersRepository } from "./schedulers.repository";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
@@ -86,7 +86,7 @@ export class SchedulersService {
         const scheduledata = await this.openai.createChatCompletion(chatCompletionRequest);
         console.log("completion: ", scheduledata.data.choices[0].message.content); // GPT 출력 결과 메세지
         //const scheduleData = schedule.data.choices[0].message.content.map((msg) => msg.content);
-        const schedule = scheduledata.data.choices[0].message.content;
+        const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
 
         const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, date, userId);
         return scheduleList;
@@ -109,11 +109,28 @@ export class SchedulersService {
   }
 
   //해당 유저의 일정 리스트 불러오기
-  async getScheduleList(id: string): Promise<GetSchedulesResponseDto[]> {
-    console.log("id: ", id);
+  async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
+
     const scheduleList = await this.schedulersRepository.getScheduleList(id);
-    console.log("scheduleList:", scheduleList);
-    return scheduleList;
+
+    const resultList: GetScheduleListResponseDto[] = [];
+
+    for (const schedule of scheduleList) {
+      const imagePath = schedule[0]['imagePath'];
+      const title = schedule['title'];
+      const schedulerId = schedule['id'];
+
+        // 각 일정의 imagePath와 title을 이용하여 GetScheduleListResponseDto 생성
+        const responseDto: GetScheduleListResponseDto = {
+          schedulerId,
+          imagePath,
+          title,
+        };
+
+        resultList.push(responseDto);
+    }
+
+    return resultList;
   }
 
   //특정 일정 불러오기

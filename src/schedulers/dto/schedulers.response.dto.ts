@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { Exclude } from "class-transformer";
 import { IsInt, IsString } from "class-validator";
 
@@ -11,9 +12,6 @@ class GetSchedulesResponseDto {
   @IsString()
   title: string;
 
-  // @ApiProperty()
-  // imagePath : string;
-
   @ApiProperty()
   @Exclude()
   startDate: Date;
@@ -24,11 +22,27 @@ class GetSchedulesResponseDto {
 
   @ApiProperty()
   @Exclude()
-  schedule: string[];
+  schedule: JsonValue[]; 
 
   @ApiProperty()
   @Exclude()
   userId: string;
+}
+
+class GetScheduleListResponseDto {
+
+    @ApiProperty()
+    @IsInt()
+    schedulerId: number;
+
+    @ApiProperty()
+    @IsString()
+    title: string;
+
+    @ApiProperty()
+    @IsString()
+    imagePath: string;
+
 }
 
 class CreateSchedulesResponseDto {
@@ -41,10 +55,7 @@ class CreateSchedulesResponseDto {
   title: string;
 
   @ApiProperty()
-  schedule: string[];
-
-  // @ApiProperty()
-  // imagePath : string;
+  schedule: JsonValue[]; 
 
   @ApiProperty()
   @Exclude()
@@ -59,4 +70,4 @@ class CreateSchedulesResponseDto {
   userId: string;
 }
 
-export { GetSchedulesResponseDto, CreateSchedulesResponseDto };
+export { GetSchedulesResponseDto, CreateSchedulesResponseDto, GetScheduleListResponseDto };

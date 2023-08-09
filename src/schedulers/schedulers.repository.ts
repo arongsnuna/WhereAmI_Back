@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { Scheduler } from "@prisma/client";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class SchedulersRepository {
   constructor(private prisma: PrismaService) {}
 
-  async createSchedule(title: string, schedule: string, date: string, userId: string): Promise<Scheduler> {
+  async createSchedule(title: string, schedule: JsonValue[], date: string, userId: string): Promise<Scheduler> {
     const [start, end] = date.split(",").map((d) => new Date(d.trim())); // 시작일과 마지막일
     const scheduler = this.prisma.scheduler.create({
       data: {
