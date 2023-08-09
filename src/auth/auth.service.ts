@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AuthResponseDto } from "./dto/auth.response.dto";
 import { LoginRequestDto, RegisterRequestDto } from "./dto/auth.request.dto";
@@ -45,13 +45,15 @@ export class AuthService {
   async login(loginRequestDto: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(loginRequestDto);
     console.log("user", user);
-    if (user) {
+    if(!user) throw new UnauthorizedException("존재하지 않는 아이디 입니다.");
+    try {
       // 유저 토큰 생성 ( Secret + Payload )
       const payload = { userName: user.userName };
       const accessToken = this.jwtService.sign(payload);
       return plainToClass(AuthResponseDto, { ...user, accessToken });
-    } else {
-      throw new UnauthorizedException("login failed");
+    }
+    catch (error) {
+      throw new InternalServerErrorException("서버 오류 발생");
     }
   }
 
