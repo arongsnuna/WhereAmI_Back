@@ -62,14 +62,14 @@ class SiDoBookmarkListDto {
   @Expose()
   @ApiProperty({
     example: "서울특별시",
-    description: "시도 이름",
+    description: "자치구 이름",
   })
   siDo: string;
 
   @Expose()
   @ApiProperty({
     type: [ResponseBookmarkDto],
-    description: "해당 시도의 북마크 리스트",
+    description: "해당 자치구의 북마크 리스트",
   })
   bookmarks: ResponseBookmarkDto[];
 }
@@ -78,7 +78,7 @@ class BookmarklistDto {
   @Expose()
   @ApiProperty({
     example: 1,
-    description: "랜드마크 ID",
+    description: "랜드마크 Id",
   })
   landmarkId: number;
 }

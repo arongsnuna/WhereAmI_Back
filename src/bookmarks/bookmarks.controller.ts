@@ -18,7 +18,7 @@ import { BookmarksService } from "./bookmarks.service";
 import { ToggleBookmarkDto, FindBookmarkDto, CreateBookmarkDto } from "./dto/bookmark.request.dto";
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 import { MessageResponseDto } from "src/common/dto/message.dto";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto } from "./dto/bookmark.response.dto";
 import { OptionalAuthGuard } from "src/auth/authentication/guards/optionAuth.guard";
 
@@ -27,8 +27,9 @@ import { OptionalAuthGuard } from "src/auth/authentication/guards/optionAuth.gua
 export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post("toggle")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "북마크 토글" })
   toggleBookmark(
     @Request() req: any,
     @Body(ValidationPipe) toggleBookmarkDto: ToggleBookmarkDto,
@@ -37,10 +38,11 @@ export class BookmarksController {
     const landmarkId = toggleBookmarkDto.landmarkId;
     return this.bookmarksService.toggleBookmark(userId, landmarkId);
   }
-  
+
   @Get("/bookmarks")
+  @ApiOperation({ summary: "북마크 리스트" })
   @UseGuards(OptionalAuthGuard)
-  async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
+  async getUserBookmarks(@Req() req: any): Promise<BookmarklistDto[]> {
     console.log("req.user: ", req.user);
     const userId = req.user?.id;
     return this.bookmarksService.getBookmarksByUserId(userId);
@@ -48,6 +50,7 @@ export class BookmarksController {
 
   //지역구별 리스트
   @Get("/user")
+  @ApiOperation({ summary: "북마크 지역구별 리스트" })
   @UseGuards(JwtAuthGuard)
   async findBookmarksByUser(@Request() req: any): Promise<SiDoBookmarkListDto[]> {
     const userId = req.user.id;
