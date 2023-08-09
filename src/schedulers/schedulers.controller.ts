@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards, Get, Req, Param, Delete, ParseIntPipe } from "@nestjs/common";
 import { SchedulersService } from "./schedulers.service";
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
-import { CreateSchedulesResponseDto, GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
+import { CreateSchedulesResponseDto, GetScheduleListResponseDto, GetSchedulesResponseDto } from "./dto/schedulers.response.dto";
 import { CreateScheduleRequestDto, DeleteScheduleRequestDto } from "./dto/schedulers.request.dto";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -26,8 +26,7 @@ export class SchedulersController {
   //일정 리스트 불러오기
   @Get()
   @ApiOperation({ summary: "일정 리스트 불러오기" })
-  @ApiResponse(GetSchedulerResponse)
-  async getScheduleList(@Req() req: any): Promise<GetSchedulesResponseDto[]> {
+  async getScheduleList(@Req() req: any): Promise<GetScheduleListResponseDto[]> {
     const userId = req.user.id;
 
     try {
@@ -49,6 +48,7 @@ export class SchedulersController {
   ): Promise<GetSchedulesResponseDto> {
     try {
       const schedule = await this.schedulersService.getSchedule(schedulerId);
+      console.log(schedule);
 
       return schedule;
     } catch (error) {
