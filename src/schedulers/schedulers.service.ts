@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage } from "openai"; // OpenAI SDK 임포트
+import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from "openai"; // OpenAI SDK 임포트
 import {
   CreateSchedulesResponseDto,
   GetScheduleListResponseDto,
@@ -62,7 +62,7 @@ export class SchedulersService {
       const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, dateArray, userId);
       return scheduleList;
     } catch (error: any) {
-      if (error && error.response && error.response.status === 429) {
+      if (error.response.status === 429) {
         // 429 오류
         throw new Error("Failed to create travel plan (429 error)");
       } else {
@@ -70,6 +70,7 @@ export class SchedulersService {
       }
     }
   }
+
 
   //해당 유저의 일정 리스트 불러오기
   async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
