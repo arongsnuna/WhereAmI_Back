@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage } from "openai"; // OpenAI SDK 임포트
+import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from "openai"; // OpenAI SDK 임포트
 import {
   CreateSchedulesResponseDto,
   GetScheduleListResponseDto,
@@ -71,6 +71,7 @@ export class SchedulersService {
     }
   }
 
+
   //해당 유저의 일정 리스트 불러오기
   async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
     const scheduleList = await this.schedulersRepository.getScheduleList(id);
@@ -78,7 +79,10 @@ export class SchedulersService {
     const resultList: GetScheduleListResponseDto[] = [];
 
     for (const schedule of scheduleList) {
-      const imagePath = schedule[0]["imagePath"];
+      const firstSchedule = schedule.schedule[0];
+      const firstDate = Object.keys(firstSchedule)[0];
+      const imagePath = firstSchedule[firstDate][0].imagePath;
+      console.log("imagePath:", imagePath )
       const title = schedule["title"];
       const schedulerId = schedule["id"];
 
