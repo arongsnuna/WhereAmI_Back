@@ -22,7 +22,7 @@ class GetSchedulesResponseDto {
 
   @ApiProperty()
   @Exclude()
-  schedule: JsonValue[]; 
+  schedule: JsonValue[];
 
   @ApiProperty()
   @Exclude()
@@ -30,19 +30,17 @@ class GetSchedulesResponseDto {
 }
 
 class GetScheduleListResponseDto {
+  @ApiProperty()
+  @IsInt()
+  schedulerId: number;
 
-    @ApiProperty()
-    @IsInt()
-    schedulerId: number;
+  @ApiProperty()
+  @IsString()
+  title: string;
 
-    @ApiProperty()
-    @IsString()
-    title: string;
-
-    @ApiProperty()
-    @IsString()
-    imagePath: string;
-
+  @ApiProperty()
+  @IsString()
+  imagePath: string;
 }
 
 class CreateSchedulesResponseDto {
@@ -55,7 +53,7 @@ class CreateSchedulesResponseDto {
   title: string;
 
   @ApiProperty()
-  schedule: JsonValue[]; 
+  schedule: JsonValue[];
 
   @ApiProperty()
   @Exclude()

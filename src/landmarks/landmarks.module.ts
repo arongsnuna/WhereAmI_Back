@@ -9,6 +9,6 @@ import { ConfigModule } from "@nestjs/config";
   imports: [S3Module, ConfigModule],
   controllers: [LandmarkController],
   providers: [LandmarkService, PrismaService, LandmarkRepository],
-  exports: [LandmarkService],
+  exports: [LandmarkService, LandmarkRepository],
 })
 export class LandmarksModule {}
