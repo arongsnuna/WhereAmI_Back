@@ -1,5 +1,3 @@
-import { Exclude } from "class-transformer";
-
 export class LandmarkEntity {
   landmark_name: string;
   address: string;
