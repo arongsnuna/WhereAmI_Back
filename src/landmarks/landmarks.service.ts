@@ -29,12 +29,11 @@ export class LandmarkService {
   }
 
   //주변 랜드마크 정보 추출 (지역ID로 검색 - 상위 5개)
-  async getNearByLandmarksByArea(areaId: number): Promise<LandmarkResponseDto[]> {
-    const landmarks = await this.landmarkRepo.getNearByLandmarksByAreaId(areaId);
+  async getNearByLandmarksByArea(name: string, areaId: number): Promise<LandmarkResponseDto[]> {
+    const landmarks = await this.landmarkRepo.getNearByLandmarksByAreaId(name, areaId);
     if (!landmarks) {
       throw new Error("Landmark not found");
     }
-
     //파일명 이름으로이미지 경로 업데이트
     const updatedLandmarksPromises = landmarks.map(async (landmark) => {
       try {

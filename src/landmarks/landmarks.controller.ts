@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  UseInterceptors,
-  UploadedFile,
-} from "@nestjs/common";
+import { Controller, Get, Param, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { LandmarkService } from "./landmarks.service";
 import { GetLandmarkDto } from "./dto/landmark.request.dto";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -29,16 +23,12 @@ export class LandmarkController {
     nearByLandmarks: LandmarkResponseDto[];
   }> {
     //해당 랜드마크 정보 추출
-    const landmark: LandmarkResponseDto =
-      await this.landmarkService.getLandmarkByName(getLandmarkDto);
+    const landmark: LandmarkResponseDto = await this.landmarkService.getLandmarkByName(getLandmarkDto);
 
     //근처 랜드마크 리스트 추출
-    const nearByLandmarks = await this.landmarkService.getNearByLandmarksByArea(
-      landmark.areaId,
-    );
+    const nearByLandmarks = await this.landmarkService.getNearByLandmarksByArea(landmark.name, landmark.areaId);
 
-    //북마크 
-    
+    //북마크
 
     return { landmark, nearByLandmarks };
   }

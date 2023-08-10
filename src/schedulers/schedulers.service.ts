@@ -9,7 +9,7 @@ import { SchedulersRepository } from "./schedulers.repository";
 import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
 import { LandmarkService } from "src/landmarks/landmarks.service";
-import { ChatMessage } from "src/common/schedule/message";
+import { ChatMessage } from "src/common/schedule/ChatMessage";
 
 @Injectable()
 export class SchedulersService {
