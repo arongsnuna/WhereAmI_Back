@@ -38,7 +38,7 @@ export class BookmarksService {
   async findBookmarksByUser(userId: string): Promise<SiDoBookmarkListDto[]> {
     try {
       const bookmarks = await this.bookmarksRepository.findManyGroupedByUser(userId);
-      if (!bookmarks) {
+      if (!bookmarks || bookmarks == undefined) {
         throw new NotFoundException("해당 유저에 대한 북마크를 불러올 수 없습니다.");
       }
       return Object.entries(bookmarks).map(([siDo, bookmarksList]) => ({
@@ -55,7 +55,7 @@ export class BookmarksService {
   async findOne(id: number): Promise<ResponseBookmarkDto> {
     try {
       const bookmark = await this.bookmarksRepository.findOne(id);
-      if (!bookmark) {
+      if (!bookmark || bookmark == undefined) {
         throw new NotFoundException(`해당 북마크(${id})를 불러올 수 없습니다.`);
       }
 
@@ -123,6 +123,9 @@ export class BookmarksService {
       if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
       const bookmarks = await this.bookmarksRepository.findManyByUser(userId);
+      if (!bookmarks || bookmarks == undefined) {
+        throw new NotFoundException(`해당 북마크(${id})를 불러올 수 없습니다.`);
+      }
   
       return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
     }

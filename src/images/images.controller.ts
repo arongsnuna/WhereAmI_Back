@@ -1,4 +1,4 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Controller, InternalServerErrorException, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ImagesService } from "./images.service";
 import { memoryStorage } from "multer";
@@ -13,6 +13,7 @@ const size = Config.get<{ filesize: number }>("IMAGE").filesize;
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
+  //이미지 업로드
   @Post()
   @ApiOperation({ summary: "Get a landmark by name" })
   @ApiResponse(LandmarkResponse)
@@ -26,10 +27,20 @@ export class ImagesController {
     landmark: LandmarkResponseDto;
     nearByLandmarks: LandmarkResponseDto[];
   }> {
-    const imageBuffer = file.buffer;
-    const landmarkName = await this.imagesService.sendImageToAi(imageBuffer); // server to AI and AI to server
-    const landmarkInfo = await this.imagesService.getLandmarkInfo(landmarkName); // server to client
-    console.log("landmarkInfo: ", landmarkInfo);
-    return landmarkInfo;
+    try {
+      if(!file) throw new BadRequestException("이미지 데이터가 유효하지 않거나 누락되었습니다.")
+      const imageBuffer = file.buffer;
+
+      //이미지 from BE to AI
+      const landmarkName = await this.imagesService.sendImageToAi(imageBuffer); // server to AI and AI to server
+
+      //ai 결과 반환
+      const landmarkInfo = await this.imagesService.getLandmarkInfo(landmarkName); // server to client
+     
+      return landmarkInfo;
+    }
+    catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    }
   }
 }
