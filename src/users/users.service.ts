@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { S3Service } from "src/common/s3/s3.service";
 import { UsersRepository } from "./users.repository";
 import { myPageResponseDto, myPageBookmarkResponseDto } from "./dto/users.response.dto";
@@ -84,14 +84,8 @@ export class UsersService {
   //현재 로그인한 사용자 정보 가져오기
   async getCurrentUser(userId: string): Promise<User | null> {
     try {
-    const result = await this.userRepo.getCurrentUser(userId);
-
-    if (!result) {
-      // 사용자를 찾지 못한 경우에 대한 처리를 여기에 추가합니다.
-      throw new Error();
-    }
-
-    return result;
+      const result = await this.userRepo.getCurrentUser(userId);
+      return result;
     }
     catch (error) {
       throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
@@ -101,16 +95,17 @@ export class UsersService {
   async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<myPageResponseDto> {
     // 파일 유효성 검사
     if (!this.s3Service.validateImageFile(file.originalname)) {
-      throw new Error("Invalid file type");
+      throw new ServiceUnavailableException("s3 서비스에서 오류가 발생하였습니다.");
     }
     try {
-
     // 파일명 중복 처리
     const fileNameKey = this.s3Service.generateUniqueFileName(file.originalname);
-    const fileName = file.originalname;
-
     const fileBuffer = file.buffer;
     const ProfilePath = await this.s3Service.uploadFile(fileBuffer, fileNameKey, "User");
+    if(!fileNameKey || ProfilePath) {
+      throw new ServiceUnavailableException("s3 서비스에서 오류가 발생하였습니다.");
+    }
+    
     const user = this.userRepo.updateImagePathById(userId, ProfilePath);
 
     return plainToClass(myPageResponseDto, user);

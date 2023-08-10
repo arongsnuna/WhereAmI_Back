@@ -1,7 +1,6 @@
 // api-file.decorator.ts
 import { UseInterceptors, applyDecorators } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-//import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from "multer";
 
 export function ApiFile() {

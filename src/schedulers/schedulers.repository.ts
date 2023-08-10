@@ -28,8 +28,6 @@ export class SchedulersRepository {
         userId: id,
       },
     });
-
-    console.log(scheduleList);
     return scheduleList;
   }
 

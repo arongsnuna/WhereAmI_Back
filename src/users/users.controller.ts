@@ -39,7 +39,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "현재 로그인한 사용자 정보 가져오기" })
   async getCurrentUser(@Req() req: any): Promise<User | null> {
-    console.log("req: ", req);
     const userId = req.user.id;
     try {
       const currentUserInfo = await this.usersService.getCurrentUser(userId);

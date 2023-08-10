@@ -36,7 +36,6 @@ export class BookmarksRepository {
   
   //존재하는지 확인
   async findBookmarkById(userId:string, landmarkId: number): Promise<Bookmark | null> {
-    console.log(`landmarkId: ${landmarkId}`);
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
         userId: userId,

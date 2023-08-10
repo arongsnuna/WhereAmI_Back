@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   S3Client,
@@ -47,7 +47,6 @@ export class S3Service {
     const parsedUrl = new URL(url);
     const bucket = parsedUrl.hostname.split(".")[0];
     const key = parsedUrl.pathname.substring(1); // 첫 번째 슬래시 제거
-    console.log("key:", key);
     const deleteCommand = new DeleteObjectCommand({
       Bucket: bucket,
       Key: key,
@@ -56,8 +55,7 @@ export class S3Service {
     try {
       await this.s3.send(deleteCommand);
     } catch (error) {
-      console.error("Error deleting file:", error);
-      throw new Error("Failed to delete file");
+      throw new InternalServerErrorException(`s3 서버 오류 - ${error}`)
     }
   }
 
@@ -71,8 +69,7 @@ export class S3Service {
     try {
       await this.s3.send(deleteCommand);
     } catch (error) {
-      console.error("Error deleting file:", error);
-      throw new Error("Failed to delete file");
+      throw new InternalServerErrorException(`s3 서버 오류 - ${error}`)
     }
   }
 
@@ -81,13 +78,6 @@ export class S3Service {
     const timestamp = Date.now();
     return `${timestamp}_${originalName}`;
   }
-
-  // generateUniqueFileName(originalName: string): string {
-  //   const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-  //   const extension = originalName.split(".").pop(); // 확장자 추출
-  //   const fileName = `${originalName}-${uniqueSuffix}.${extension}`;
-  //   return fileName;
-  // }
 
   // file 유효성 검사
   validateImageFile(originalName: string): boolean {
@@ -109,7 +99,6 @@ export class S3Service {
 
   //ACL check
   async checkObjectAcl(imageKey: string): Promise<boolean> {
-    console.log("imageKey: ", imageKey);
     const command = new GetObjectAclCommand({
       Bucket: this.configService.get<string>("AWS_BUCKET_NAME"),
       Key: imageKey,

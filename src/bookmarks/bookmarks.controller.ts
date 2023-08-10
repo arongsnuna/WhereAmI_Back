@@ -89,7 +89,6 @@ export class BookmarksController {
    // 북마크 아이디로 1개 조회 (테스트용)
    @Get(":id")
    get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
-     console.log("typeof id: ", typeof id);
      return this.bookmarksService.findOne(id);
    }
  
