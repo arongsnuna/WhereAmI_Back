@@ -3,7 +3,6 @@ import { Landmark } from ".prisma/client";
 import { Injectable } from "@nestjs/common";
 import { GetLandmarkDto } from "./dto/landmark.request.dto";
 import { LandmarkEntity } from "src/landmarks/landmark.entity";
-import { plainToClass } from "class-transformer";
 
 @Injectable()
 export class LandmarkRepository {
@@ -21,24 +20,32 @@ export class LandmarkRepository {
     return landmarkData;
   }
 
-  async findLandmarkByName(getLandmarkDto: GetLandmarkDto): Promise<LandmarkEntity> {
+  async findLandmarkByName(getLandmarkDto: GetLandmarkDto): Promise<Landmark> {
     const landmark = await this.prisma.landmark.findUnique({
       where: { name: getLandmarkDto.name },
     });
 
-    return plainToClass(LandmarkEntity, landmark);
+    return landmark;
   }
 
-  async getNearByLandmarksByAreaId(areaId: number): Promise<LandmarkEntity[]> {
-    const landmarks = await this.prisma.landmark.findMany({
-      where: { areaId },
-      take: 5,
-    });
+  async getNearByLandmarksByAreaId(name: string, areaId: number): Promise<Landmark[]> {
+    // name을 제외한 랜덤한 5개 랜드마크 가져오기, raw SQL을 사용
+    const rawLandmarks: LandmarkEntity[] = await this.prisma
+      .$queryRaw`SELECT * FROM "Landmark" WHERE area_id = ${areaId} AND landmark_name != ${name} ORDER BY RANDOM() LIMIT 5`;
 
-    return landmarks.map((landmark) => plainToClass(LandmarkEntity, landmark));
+    const landmarks: Landmark[] = rawLandmarks.map((landmark) => ({
+      id: landmark.landmark_id,
+      fileName: landmark.file_name,
+      name: landmark.landmark_name,
+      areaId: landmark.area_id,
+      address: landmark.address,
+      imagePath: landmark.image_path,
+    }));
+
+    return landmarks;
   }
 
-  async updateImagePath(name: string, imagePath: string): Promise<LandmarkEntity> {
+  async updateImagePath(name: string, imagePath: string): Promise<Landmark> {
     return await this.prisma.landmark.update({
       where: { name },
       data: { imagePath },

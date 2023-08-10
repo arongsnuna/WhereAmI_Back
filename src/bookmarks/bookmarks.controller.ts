@@ -18,7 +18,7 @@ import { BookmarksService } from "./bookmarks.service";
 import { ToggleBookmarkDto, FindBookmarkDto, CreateBookmarkDto } from "./dto/bookmark.request.dto";
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 import { MessageResponseDto } from "src/common/dto/message.dto";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ResponseBookmarkDto, SiDoBookmarkListDto, BookmarklistDto } from "./dto/bookmark.response.dto";
 import { OptionalAuthGuard } from "src/auth/authentication/guards/optionAuth.guard";
 
@@ -29,6 +29,7 @@ export class BookmarksController {
 
   @Post("toggle")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "북마크 토글" })
   toggleBookmark(
     @Request() req: any,
@@ -52,6 +53,7 @@ export class BookmarksController {
   @Get("/user")
   @ApiOperation({ summary: "북마크 지역구별 리스트" })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async findBookmarksByUser(@Request() req: any): Promise<SiDoBookmarkListDto[]> {
     const userId = req.user.id;
     return this.bookmarksService.findBookmarksByUser(userId);
@@ -59,6 +61,7 @@ export class BookmarksController {
 
   @Get(":landmarkId")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async findOneByUserAndLandmark(
     @Request() req: any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,
@@ -70,6 +73,7 @@ export class BookmarksController {
   //유저의 랜드마크 아이디로 조회
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async createBookmark(
     @Request() req: any,
     @Body(ValidationPipe) createBookmarkDto: CreateBookmarkDto,
@@ -81,6 +85,7 @@ export class BookmarksController {
 
   @Delete(":landmarkId")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async deleteBookmark(
     @Request() req: any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,

@@ -106,12 +106,20 @@ export class UsersRepository {
   }
 
   //현재 로그인한 사용자 정보 가져오기
-  async getCurrentUser (id: string): Promise<User | null> {
+  async getCurrentUser(id: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
-      where:  {
-        id
-      } 
+      where: {
+        id,
+      },
     });
-}
-
   }
+
+  async updateImagePathById(userId: string, profilePath: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        profilePath: profilePath,
+      },
+    });
+  }
+}

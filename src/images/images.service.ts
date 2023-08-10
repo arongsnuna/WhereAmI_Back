@@ -41,11 +41,8 @@ export class ImagesService {
     nearByLandmarks: LandmarkResponseDto[];
   }> {
     const getLandmarkDto = new GetLandmarkDto(landmarkName);
-    const landmark: LandmarkResponseDto =
-      await this.landmarkService.getLandmarkByName(getLandmarkDto);
-    const nearByLandmarks = await this.landmarkService.getNearByLandmarksByArea(
-      landmark.areaId,
-    );
+    const landmark: LandmarkResponseDto = await this.landmarkService.getLandmarkByName(getLandmarkDto);
+    const nearByLandmarks = await this.landmarkService.getNearByLandmarksByArea(landmark.name, landmark.areaId);
     return { landmark, nearByLandmarks };
   }
 }

@@ -7,6 +7,9 @@ import {
   UseGuards,
   Req,
   Delete,
+  Post,
+  UseInterceptors,
+  UploadedFile,
   InternalServerErrorException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
@@ -18,6 +21,8 @@ import GetUserInfoResponse from "src/docs/users/users.swagger";
 import { MessageResponse } from "src/docs/global.swagger";
 import { MessageResponseDto } from "../common/dto/message.dto";
 import { User } from "@prisma/client";
+import { ApiFile } from "src/common/decorators/apiFile.decorator";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @UseGuards(JwtAuthGuard)
 @ApiTags("user")
@@ -83,5 +88,18 @@ export class UsersController {
     const result = await this.usersService.deleteUser(req.user.id);
 
     return result;
+  }
+
+  @Post("Image")
+  @ApiFile()
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadFile(@Req() req: any, @UploadedFile() file: Express.Multer.File): Promise<myPageResponseDto> {
+    const userId = req.user.id;
+    console.log("userId: ", userId);
+    if (!file) {
+      throw new Error("File is not provided");
+    }
+    const user = await this.usersService.uploadProfileImage(userId, file);
+    return user;
   }
 }

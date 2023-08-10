@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { S3Service } from 'src/common/s3/s3.service';
-import { UsersRepository } from './users.repository';
-import { myPageResponseDto,myPageBookmarkResponseDto } from './dto/users.response.dto';
-import { plainToClass } from 'class-transformer';
-import { MessageResponseDto } from '../common/dto/message.dto';
-import { User } from '@prisma/client';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { S3Service } from "src/common/s3/s3.service";
+import { UsersRepository } from "./users.repository";
+import { myPageResponseDto, myPageBookmarkResponseDto } from "./dto/users.response.dto";
+import { plainToClass } from "class-transformer";
+import { MessageResponseDto } from "../common/dto/message.dto";
+import { User } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
@@ -69,8 +69,8 @@ export class UsersService {
     return { message: "계정을 성공적으로 삭제하였습니다." };
   }
 
-   //현재 로그인한 사용자 정보 가져오기
-   async getCurrentUser(userId: string): Promise<User | null> {
+  //현재 로그인한 사용자 정보 가져오기
+  async getCurrentUser(userId: string): Promise<User | null> {
     const result = await this.userRepo.getCurrentUser(userId);
     console.log(result);
 
@@ -82,4 +82,20 @@ export class UsersService {
     return result;
   }
 
+  async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<myPageResponseDto> {
+    // 파일 유효성 검사
+    if (!this.s3Service.validateImageFile(file.originalname)) {
+      throw new Error("Invalid file type");
+    }
+
+    // 파일명 중복 처리
+    const fileNameKey = this.s3Service.generateUniqueFileName(file.originalname);
+    const fileName = file.originalname;
+
+    const fileBuffer = file.buffer;
+    const ProfilePath = await this.s3Service.uploadFile(fileBuffer, fileNameKey, "User");
+    const user = this.userRepo.updateImagePathById(userId, ProfilePath);
+
+    return plainToClass(myPageResponseDto, user);
+  }
 }
