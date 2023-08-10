@@ -11,7 +11,7 @@ export function ChatMessage(inputdata: string) {
     {
       role: ChatCompletionRequestMessageRoleEnum.SYSTEM,
       content:
-        "You are good at making travel schedules. The location is Seoul, Korea, so you have to base your information on it, and Answers must be translated into Korean.",
+        "You are good at making travel schedules. The location is Seoul, Korea, so you have to base your information on it, and Answers must be translated into Korean. and The output json form must be as follows: '{{'date': {{'name': {{'time':, 'address':, 'description':, 'recommendPlace':, 'distance':, 'duration':, 'transportation': }} }} }}, Group the JSON objects by the same 'date' field. ",
     },
     {
       role: ChatCompletionRequestMessageRoleEnum.USER,
@@ -29,7 +29,7 @@ export function ChatMessage(inputdata: string) {
     {
       role: ChatCompletionRequestMessageRoleEnum.ASSISTANT,
       content:
-        "take the form The output json form is as follows: '{{date: {{name: {{time, address, description, recommendPlace, distance, duration, transportation}} }} }}' ",
+        "take the form The output json form is as follows: '{{'date': {{ 'name': , 'time':, 'address':, 'description':, 'recommendPlace':, 'distance':, 'duration':, 'transportation': }} }}' ",
     },
     {
       role: ChatCompletionRequestMessageRoleEnum.USER,
@@ -40,7 +40,7 @@ export function ChatMessage(inputdata: string) {
         "3. Explanation is required for each place! Please include in the 'description' if any of the places are closed on certain days. Also, distance information should be based on the actual kilometers to each place. There should also be a 'duration' field in minutes and hours. Please send only the numbers without the units. \n" +
         "4. In the 'transportation' field, please provide a comprehensive guide on how to travel from the previous location to the current one. This should include the specific subway lines, transfer points, bus numbers, and any walking directions if necessary. I'd like a step-by-step instruction." +
         "5. While we move in order of proximity, the journey is determined by connecting to the nearest location from the last place visited. Therefore, the distance between places needs to be calculated. Please arrange the schedule efficiently considering the distances between places.\n" +
-        "6. I need to send it in 'json' format, Please take the form of 'json' including the field, take the form The output json form is as follows: '{{'date': {{ 'name': , 'time':, 'address':, 'description':, 'recommendPlace':, 'distance':, 'duration':, 'transportation': }} }}' \n" +
+        "6. I need to send it in 'json' format, Please take the form of 'json' including the field, take the form The output json form is as follows: '{{'date': {{ 'name': , 'time':, 'address':, 'description':, 'recommendPlace':, 'distance':, 'duration':, 'transportation': }} }}' Group the JSON objects by the same 'date' field. \n" +
         "7. The travel itinerary should be appropriately scheduled over the given duration. Moreover, the sequence should be arranged in the order of the closest proximity between places. As a result, it needs to be calculated based on the 'distance' and 'duration' between the subsequent locations. Once again, please adhere to the numbered instructions above. Calculate the distance and time between the places accurately. \n" +
         "8. You must respond in 'Korean' and You can only answer in the above json format. \n" +
         "9. you must include over one place everyday. Also, utilize only the places which are written in format [place] and make use the places only one time at a schedule.\n" +
