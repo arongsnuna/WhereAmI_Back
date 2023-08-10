@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from "openai"; // OpenAI SDK 임포트
 import {
   CreateSchedulesResponseDto,
@@ -10,6 +10,7 @@ import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
 import { LandmarkService } from "src/landmarks/landmarks.service";
 import { ChatMessage } from "src/common/schedule/ChatMessage";
+import { NotFound } from "@aws-sdk/client-s3";
 
 @Injectable()
 export class SchedulersService {
@@ -27,6 +28,7 @@ export class SchedulersService {
 
   //일정 생성 & 저장
   async askGpt(createScheduleRequestDto: CreateScheduleRequestDto): Promise<CreateSchedulesResponseDto> {
+
     const { date, title, userId, place } = createScheduleRequestDto;
     const dateArray = date.split(",").map((d) => new Date(d.trim())); // 시작일과 마지막일
     const placeArray = place.split(",").map((d) => d.trim());
@@ -36,17 +38,23 @@ export class SchedulersService {
         return landmark.imagePath;
       }),
     );
+    if(!imagePathArray || imagePathArray == undefined){
+      throw new NotFoundException("이미지를 찾을 수 없습니다.")
+    }
     const inputdata = `[${date}] [${place}]`;
 
     const chatCompletionRequest: CreateChatCompletionRequest = {
       model: "gpt-3.5-turbo",
       messages: ChatMessage(inputdata),
       temperature: 0.1,
-      //max_tokens: 1000,
     };
 
     try {
       const scheduledata = await this.openai.createChatCompletion(chatCompletionRequest);
+      if(!scheduledata || scheduledata == undefined) {
+        throw new ServiceUnavailableException("openai 서비스 오류가 발생했습니다.");
+      }
+
       const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
 
       // schedule(JSON 데이터)의 imagePath 추가
@@ -57,64 +65,81 @@ export class SchedulersService {
           index++;
         });
       });
+
       // 스케쥴 생성
       const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, dateArray, userId);
+
       return scheduleList;
-    } catch (error: any) {
+    } 
+    catch (error: any) {
       if (error.response.status === 429) {
         // 429 오류
         throw new Error("Failed to create travel plan (429 error)");
-      } else {
-        throw error;
+      } {
+        throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
       }
     }
   }
 
   //해당 유저의 일정 리스트 불러오기
   async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
-    const scheduleList = await this.schedulersRepository.getScheduleList(id);
+    try {
+      const scheduleList = await this.schedulersRepository.getScheduleList(id);
 
-    const resultList: GetScheduleListResponseDto[] = [];
+      const resultList: GetScheduleListResponseDto[] = [];
+      for (const schedule of scheduleList) {
+        const firstSchedule = schedule.schedule[0];
+        const firstDate = Object.keys(firstSchedule)[0];
+        const imagePath = firstSchedule[firstDate][0].imagePath;
+        const title = schedule["title"];
+        const schedulerId = schedule["id"];
 
-    for (const schedule of scheduleList) {
-      const firstSchedule = schedule.schedule[0];
-      const firstDate = Object.keys(firstSchedule)[0];
-      const imagePath = firstSchedule[firstDate][0].imagePath;
-      console.log("imagePath:", imagePath);
-      const title = schedule["title"];
-      const schedulerId = schedule["id"];
+        // 각 일정의 imagePath와 title을 이용하여 GetScheduleListResponseDto 생성
+        const responseDto: GetScheduleListResponseDto = {
+          schedulerId,
+          imagePath,
+          title,
+        };
 
-      // 각 일정의 imagePath와 title을 이용하여 GetScheduleListResponseDto 생성
-      const responseDto: GetScheduleListResponseDto = {
-        schedulerId,
-        imagePath,
-        title,
-      };
+        resultList.push(responseDto);
+      }
 
-      resultList.push(responseDto);
+      return resultList;
     }
-
-    return resultList;
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    }
   }
 
   //특정 일정 불러오기
   async getSchedule(id: number): Promise<GetSchedulesResponseDto> {
-    const schedule = await this.schedulersRepository.getSchedule(id);
+    try {
+      const schedule = await this.schedulersRepository.getSchedule(id);
 
-    return schedule;
+      return schedule;
+    }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    }
   }
 
   //일정 삭제하기
   async deleteSchedule(id: number): Promise<null | MessageResponseDto> {
-    //일정이 존재하는지 확인
-    const existingSchedule = await this.schedulersRepository.getSchedulebyId(id);
-    if (!existingSchedule) {
-      throw new Error("해당 일정이 존재하지 않습니다.");
+    try {
+      //일정이 존재하는지 확인
+      const existingSchedule = await this.schedulersRepository.getSchedulebyId(id);
+      if (!existingSchedule) {
+        throw new NotFoundException("해당 일정이 존재하지 않습니다.");
+      }
+      
+      const title = existingSchedule.title;
+
+      await this.schedulersRepository.deleteSchedule(id);
+
+      return { message: `${title} 일정이 성공적으로 삭제되었습니다.` };
     }
-    const title = existingSchedule.title;
-
-    await this.schedulersRepository.deleteSchedule(id);
-
-    return { message: `${title} 일정이 성공적으로 삭제되었습니다.` };
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    }
   }
 }

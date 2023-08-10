@@ -11,6 +11,8 @@ import {
   Req,
   InternalServerErrorException,
   UnauthorizedException,
+  Param,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { BookmarksService } from "./bookmarks.service";
 
@@ -52,7 +54,7 @@ export class BookmarksController {
   }
   
   //북마크 페이지
-  @Get("/bookmarks")
+  @Get()
   @ApiOperation({ summary: "북마크 리스트" })
   @UseGuards(OptionalAuthGuard)
   async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
@@ -83,4 +85,13 @@ export class BookmarksController {
       throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
     }
   }
+
+   // 북마크 아이디로 1개 조회 (테스트용)
+   @Get(":id")
+   get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
+     console.log("typeof id: ", typeof id);
+     return this.bookmarksService.findOne(id);
+   }
+ 
+ 
 }
