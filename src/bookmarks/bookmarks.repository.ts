@@ -174,37 +174,4 @@ export class BookmarksRepository {
       where: { id },
     });
   }
-  // async deleteByLandmarkId(userId: string, landmarkId: number): Promise<void> {
-  //   const bookmark = await this.prisma.bookmark.findFirst({
-  //     where: {
-  //       userId,
-  //       landmarkId,
-  //     },
-  //   });
-
-  //   if (bookmark) {
-  //     await this.prisma.bookmark.delete({
-  //       where: { id: bookmark.id },
-  //     });
-  //   }
-  // }
-
-  // async findAll(): Promise<Bookmark[]> {
-  //   return this.prisma.bookmark.findMany({
-  //     where: { id },
-  //     include: {
-  //       landmark: {
-  //         include: {
-  //           area: true,
-  //           id: true,
-  //         },
-  //         select: {
-  //           address: true,
-  //           name: true,
-  //           imagePath: true,
-  //         },
-  //       },
-  //     },
-  //   });
-  // }
 }
