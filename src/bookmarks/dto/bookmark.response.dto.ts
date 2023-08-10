@@ -1,7 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Area, Bookmark, Landmark } from "@prisma/client";
 import { Expose } from "class-transformer";
-import { LandmarkEntity } from "src/landmarks/landmark.entity";
 
 class ResponseBookmarkDto {
   @Expose()

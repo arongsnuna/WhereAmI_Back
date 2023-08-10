@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Bookmark } from "@prisma/client";
 import { PrismaService } from "src/prisma.service";
 import { ResponseBookmarkDto } from "./dto/bookmark.response.dto";
@@ -33,25 +33,9 @@ export class BookmarksRepository {
       createdAt: bookmark.createdAt,
     };
   }
-
-  async findBookmarkByUserId(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    return user;
-  }
-
-  async findBookmarkByLandmarkId(landmarkId: number) {
-    const landmark = await this.prisma.landmark.findUnique({
-      where: { id: landmarkId },
-    });
-
-    return landmark;
-  }
-
+  
+  //존재하는지 확인
   async findBookmarkById(userId:string, landmarkId: number): Promise<Bookmark | null> {
-    console.log(`landmarkId: ${landmarkId}`);
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
         userId: userId,
@@ -62,6 +46,7 @@ export class BookmarksRepository {
     return bookmarkExists;
   }
 
+  //북마크 추가
   async createBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto> {
     const createdBookmark = await this.prisma.bookmark.create({
       data: {
@@ -84,32 +69,14 @@ export class BookmarksRepository {
     return this.toResponseBookmarkDto(createdBookmark);
   }
 
-  async findManyByUser(userId: string): Promise<ResponseBookmarkDto[]> {
-    const bookmarks = await this.prisma.bookmark.findMany({
-      where: { userId: userId },
-      include: {
-        landmark: {
-          select: {
-            id: true,
-            address: true,
-            name: true,
-            imagePath: true,
-            area: {
-              select: {
-                siDo: true,
-              },
-            },
-          },
-        },
-      },
+  //북마크 취소
+  async delete(id: number): Promise<void> {
+    await this.prisma.bookmark.delete({
+      where: { id },
     });
-    const groupedBySiDo: ResponseBookmarkDto[] = [];
-    for (const bookmark of bookmarks) {
-      groupedBySiDo.push(this.toResponseBookmarkDto(bookmark));
-    }
-    return groupedBySiDo;
   }
 
+  //북마크 리스트 불러오기
   async findManyGroupedByUser(userId: string): Promise<Record<string, ResponseBookmarkDto[]>> {
     const bookmarks = await this.prisma.bookmark.findMany({
       where: { userId: userId },
@@ -143,6 +110,7 @@ export class BookmarksRepository {
     return groupedBySiDo;
   }
 
+  //북마크id로 불러오기
   async findOne(id: number): Promise<ResponseBookmarkDto> {
     const bookmark = await this.prisma.bookmark.findUnique({
       where: { id: id },
@@ -169,9 +137,30 @@ export class BookmarksRepository {
     return this.toResponseBookmarkDto(bookmark);
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.bookmark.delete({
-      where: { id },
+  //userId로 불러오기
+  async findManyByUser(userId: string): Promise<ResponseBookmarkDto[]> {
+    const bookmarks = await this.prisma.bookmark.findMany({
+      where: { userId: userId },
+      include: {
+        landmark: {
+          select: {
+            id: true,
+            address: true,
+            name: true,
+            imagePath: true,
+            area: {
+              select: {
+                siDo: true,
+              },
+            },
+          },
+        },
+      },
     });
+    const groupedBySiDo: ResponseBookmarkDto[] = [];
+    for (const bookmark of bookmarks) {
+      groupedBySiDo.push(this.toResponseBookmarkDto(bookmark));
+    }
+    return groupedBySiDo;
   }
 }

@@ -1,10 +1,5 @@
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "class-transformer";
 
-class GetScheduleListRequestDto {
-  @ApiProperty()
-  id: string;
-}
 
 class ScheduleRequestDto {
   @ApiProperty()
@@ -47,4 +42,4 @@ class DeleteScheduleRequestDto {
   userId: string;
 }
 
-export { GetScheduleListRequestDto, ScheduleRequestDto, CreateScheduleRequestDto, DeleteScheduleRequestDto };
+export { ScheduleRequestDto, CreateScheduleRequestDto, DeleteScheduleRequestDto };

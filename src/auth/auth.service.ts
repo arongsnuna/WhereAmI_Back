@@ -44,7 +44,6 @@ export class AuthService {
   //로그인
   async login(loginRequestDto: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(loginRequestDto);
-    console.log("user", user);
     if(!user) throw new UnauthorizedException("존재하지 않는 아이디 입니다.");
     try {
       // 유저 토큰 생성 ( Secret + Payload )

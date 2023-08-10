@@ -5,18 +5,6 @@ import { Observable } from "rxjs";
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-
-    // //Authorization 헤더가 있는지 확인
-    // if (!request.headers.authorization) {
-    //   throw new UnauthorizedException("Authorization 헤더가 없습니다");
-    // }
-
-    // //Content-Type 헤더가 올바른지 확인
-    // if (request.headers["content-type"] !== "application/json") {
-    //   throw new UnauthorizedException("Content-Type 헤더가 잘못되었습니다");
-    // }
-
     return super.canActivate(context);
   }
 
