@@ -28,7 +28,6 @@ export class SchedulersService {
 
   //일정 생성 & 저장
   async askGpt(createScheduleRequestDto: CreateScheduleRequestDto): Promise<CreateSchedulesResponseDto> {
-
     const { date, title, userId, place } = createScheduleRequestDto;
     const dateArray = date.split(",").map((d) => new Date(d.trim())); // 시작일과 마지막일
     const placeArray = place.split(",").map((d) => d.trim());
@@ -38,8 +37,8 @@ export class SchedulersService {
         return landmark.imagePath;
       }),
     );
-    if(!imagePathArray || imagePathArray == undefined){
-      throw new NotFoundException("이미지를 찾을 수 없습니다.")
+    if (!imagePathArray || imagePathArray == undefined) {
+      throw new NotFoundException("이미지를 찾을 수 없습니다.");
     }
     const inputdata = `[${date}] [${place}]`;
 
@@ -51,12 +50,11 @@ export class SchedulersService {
 
     try {
       const scheduledata = await this.openai.createChatCompletion(chatCompletionRequest);
-      if(!scheduledata || scheduledata == undefined) {
+      if (!scheduledata || scheduledata == undefined) {
         throw new ServiceUnavailableException("openai 서비스 오류가 발생했습니다.");
       }
-
+      console.log("result: ", scheduledata.data.choices[0].message.content);
       const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
-
       // schedule(JSON 데이터)의 imagePath 추가
       let index = 0;
       Object.values(schedule).forEach((dateArray: any[]) => {
@@ -70,14 +68,14 @@ export class SchedulersService {
       const scheduleList = await this.schedulersRepository.createSchedule(title, schedule, dateArray, userId);
 
       return scheduleList;
-    } 
-    catch (error: any) {
-      if (error.response.status === 429) {
-        // 429 오류
-        throw new Error("Failed to create travel plan (429 error)");
-      } {
-        throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error: any) {
+      if (error && error.response && typeof error.response.status !== "undefined") {
+        if (error.response.status === 429) {
+          // 429 오류
+          throw new Error("Failed to create travel plan (429 error)");
+        }
       }
+      throw new Error("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 
@@ -105,9 +103,8 @@ export class SchedulersService {
       }
 
       return resultList;
-    }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 
@@ -117,9 +114,8 @@ export class SchedulersService {
       const schedule = await this.schedulersRepository.getSchedule(id);
 
       return schedule;
-    }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 
@@ -131,15 +127,14 @@ export class SchedulersService {
       if (!existingSchedule) {
         throw new NotFoundException("해당 일정이 존재하지 않습니다.");
       }
-      
+
       const title = existingSchedule.title;
 
       await this.schedulersRepository.deleteSchedule(id);
 
       return { message: `${title} 일정이 성공적으로 삭제되었습니다.` };
-    }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 }

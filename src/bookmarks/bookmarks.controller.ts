@@ -13,6 +13,7 @@ import {
   UnauthorizedException,
   Param,
   ParseIntPipe,
+  Delete,
 } from "@nestjs/common";
 import { BookmarksService } from "./bookmarks.service";
 
@@ -29,7 +30,6 @@ export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
 
   //북마크 토글
-  @UseGuards(JwtAuthGuard)
   @Post("toggle")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -40,19 +40,18 @@ export class BookmarksController {
   ): Promise<ResponseBookmarkDto | MessageResponseDto> {
     try {
       const userId = req.user.id;
-      if(!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+      if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
       const landmarkId = toggleBookmarkDto.landmarkId;
-      if(!landmarkId) throw new BadRequestException("북마크에 추가되지 않는 랜드마크입니다.")
+      if (!landmarkId) throw new BadRequestException("북마크에 추가되지 않는 랜드마크입니다.");
 
       //토글
       return this.bookmarksService.toggleBookmark(userId, landmarkId);
-    } 
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
-  
+
   //북마크 페이지
   @Get()
   @ApiOperation({ summary: "북마크 리스트" })
@@ -60,12 +59,11 @@ export class BookmarksController {
   async getUserBookmarks(@Request() req: any): Promise<BookmarklistDto[]> {
     try {
       const userId = req.user.id;
-      if(!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+      if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
       return this.bookmarksService.getBookmarksByUserId(userId);
-      }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 
@@ -76,21 +74,29 @@ export class BookmarksController {
   @ApiBearerAuth()
   async findBookmarksByUser(@Request() req: any): Promise<SiDoBookmarkListDto[]> {
     try {
-    const userId = req.user.id;
-    if(!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+      const userId = req.user.id;
+      if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
-    return this.bookmarksService.findBookmarksByUser(userId);
-    }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+      return this.bookmarksService.findBookmarksByUser(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 
-   // 북마크 아이디로 1개 조회 (테스트용)
-   @Get(":id")
-   get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
-     return this.bookmarksService.findOne(id);
-   }
- 
- 
+  // 북마크 아이디로 1개 조회 (테스트용)
+  @Get(":id")
+  get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
+    return this.bookmarksService.findOne(id);
+  }
+
+  @Delete(":landmarkId")
+  @UseGuards(JwtAuthGuard)
+  async deleteBookmark(
+    @Request() req: any,
+    @Param("landmarkId", ParseIntPipe) landmarkId: number,
+  ): Promise<void | MessageResponseDto> {
+    const userId = req.user.id; // 로그인된 사용자의 ID
+    const message = this.bookmarksService.delete(userId, landmarkId);
+    return message;
+  }
 }
