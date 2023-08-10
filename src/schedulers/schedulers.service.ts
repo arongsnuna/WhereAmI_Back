@@ -55,6 +55,7 @@ export class SchedulersService {
       }
       console.log("result: ", scheduledata.data.choices[0].message.content);
       const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
+      console.log("!!!!schedule: ", schedule);
       // schedule(JSON 데이터)의 imagePath 추가
       let index = 0;
       Object.values(schedule).forEach((dateArray: any[]) => {
