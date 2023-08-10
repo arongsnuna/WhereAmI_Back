@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class GetLandmarkDto {
   @IsString()
   @ApiProperty({
-    description: "The name of the landmark",
+    description: "랜드마크 장소 이름",
     example: "63시티",
   })
   readonly name: string;

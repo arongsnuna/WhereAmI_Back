@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 class ToggleBookmarkDto {
   @IsNumber()
   @ApiProperty({
-    description: "랜드마크 아이디",
+    description: "랜드마크 Id",
     example: 1,
   })
   landmarkId: number;
@@ -13,7 +13,7 @@ class ToggleBookmarkDto {
 class CreateBookmarkDto {
   @IsNumber()
   @ApiProperty({
-    description: "랜드마크 아이디",
+    description: "랜드마크 Id",
     example: 1,
   })
   landmarkId: number;
@@ -22,7 +22,7 @@ class CreateBookmarkDto {
 class FindBookmarkDto {
   @IsString()
   @ApiProperty({
-    description: "랜드마크 아이디",
+    description: "유저 Id",
     example: 1,
   })
   userId: string;

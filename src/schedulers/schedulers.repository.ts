@@ -8,7 +8,6 @@ export class SchedulersRepository {
   constructor(private prisma: PrismaService) {}
 
   async createSchedule(title: string, schedule: JsonValue[], date: Date[], userId: string): Promise<Scheduler> {
-    //const [start, end] = date.split(",").map((d) => new Date(d.trim())); // 시작일과 마지막일
     const scheduler = this.prisma.scheduler.create({
       data: {
         title,

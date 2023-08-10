@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Configuration, OpenAIApi, CreateChatCompletionRequest, ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from "openai"; // OpenAI SDK 임포트
+import { Configuration, OpenAIApi, CreateChatCompletionRequest } from "openai"; // OpenAI SDK 임포트
 import {
   CreateSchedulesResponseDto,
   GetScheduleListResponseDto,
@@ -27,7 +27,6 @@ export class SchedulersService {
 
   //일정 생성 & 저장
   async askGpt(createScheduleRequestDto: CreateScheduleRequestDto): Promise<CreateSchedulesResponseDto> {
-    // Destructuring을 사용하여 변수 추출
     const { date, title, userId, place } = createScheduleRequestDto;
     const dateArray = date.split(",").map((d) => new Date(d.trim())); // 시작일과 마지막일
     const placeArray = place.split(",").map((d) => d.trim());
@@ -71,7 +70,6 @@ export class SchedulersService {
     }
   }
 
-
   //해당 유저의 일정 리스트 불러오기
   async getScheduleList(id: string): Promise<GetScheduleListResponseDto[]> {
     const scheduleList = await this.schedulersRepository.getScheduleList(id);
@@ -82,7 +80,7 @@ export class SchedulersService {
       const firstSchedule = schedule.schedule[0];
       const firstDate = Object.keys(firstSchedule)[0];
       const imagePath = firstSchedule[firstDate][0].imagePath;
-      console.log("imagePath:", imagePath )
+      console.log("imagePath:", imagePath);
       const title = schedule["title"];
       const schedulerId = schedule["id"];
 
