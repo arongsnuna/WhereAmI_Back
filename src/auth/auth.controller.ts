@@ -29,10 +29,4 @@ export class AuthController {
   async login(@Body(ValidationPipe) loginRequestDto: LoginRequestDto): Promise<AuthResponseDto> {
     return this.authService.login(loginRequestDto);
   }
-
-  @Post("test")
-  @UseGuards(AuthGuard())
-  test(@Req() req) {
-    console.log("req", req);
-  }
 }
