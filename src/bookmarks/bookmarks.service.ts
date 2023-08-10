@@ -14,7 +14,6 @@ export class BookmarksService {
   //북마크 토글 (추가 | 취소)
   async toggleBookmark(userId: string, landmarkId: number): Promise<ResponseBookmarkDto | MessageResponseDto> {
     try {
-
       // 북마크 취소
       const existingBookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
       if (existingBookmark) {
@@ -28,9 +27,8 @@ export class BookmarksService {
         const bookmark = await this.bookmarksRepository.createBookmark(userId, landmarkId);
         return plainToClass(ResponseBookmarkDto, bookmark);
       }
-    } 
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 
@@ -45,10 +43,9 @@ export class BookmarksService {
         siDo,
         bookmarks: bookmarksList.map((bookmark) => plainToClass(ResponseBookmarkDto, bookmark)),
       }));
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
   }
 
   //bookmarkId로 불러오기
@@ -60,9 +57,8 @@ export class BookmarksService {
       }
 
       return plainToClass(ResponseBookmarkDto, bookmark);
-    }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
   }
 
@@ -75,12 +71,26 @@ export class BookmarksService {
       if (!bookmarks || bookmarks == undefined) {
         throw new NotFoundException(`해당 북마크를 불러올 수 없습니다.`);
       }
-  
+
       return bookmarks.map((bookmark) => plainToClass(BookmarklistDto, bookmark));
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+  }
+
+  async delete(userId: string, landmarkId: number): Promise<null | MessageResponseDto> {
+    console.log("id: ", landmarkId);
+    const bookmark = await this.bookmarksRepository.findBookmarkById(userId, landmarkId);
+
+    if (!bookmark) {
+      throw new NotFoundException(`Bookmark with id ${landmarkId} not found`);
     }
-    
+
+    if (bookmark.userId !== userId) {
+      throw new UnauthorizedException(`Not owned by the current user`);
+    }
+    await this.bookmarksRepository.delete(bookmark.id);
+
+    return { message: `landmarkId: ${landmarkId} deleted successfully` };
   }
 }
