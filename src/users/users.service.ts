@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { S3Service } from "src/common/s3/s3.service";
 import { UsersRepository } from "./users.repository";
 import { myPageResponseDto, myPageBookmarkResponseDto } from "./dto/users.response.dto";
@@ -15,34 +15,35 @@ export class UsersService {
 
   // 프로필 정보 불러오기
   async getUserById(id: string): Promise<myPageResponseDto> {
-    const user = await this.userRepo.getUserById(id);
-    if (!user) {
-      throw new Error();
-    }
+    try {
+      const user = await this.userRepo.getUserById(id);
+      if (!user) {
+        throw new NotFoundException("해당 유저를 찾을 수 없습니다.");
+      }
 
-    //북마크 리스트
-    const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
+      //북마크 리스트
+      const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
+      if(!bookmarkCounts) throw new NotFoundException("북마크를 찾을 수 없습니다.");
 
-    const myPageResponse = plainToClass(myPageResponseDto, {
-      ...user,
-      bookmarkCounts,
-    });
+      const myPageResponse = plainToClass(myPageResponseDto, {
+        ...user,
+        bookmarkCounts,
+      });
 
-    return myPageResponse;
+      return myPageResponse;
+      }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 
-  // 마이 프로필 업데이트 (프로필 사진(profilePath) | 유저네임(userName) | 자기소개(description) )
+  // 마이 프로필 업데이트 (유저네임(userName) | 자기소개(description) )
   async updateUserInfo(
     id: string,
-    profilePath?: string,
     userName?: string,
     description?: string,
   ): Promise<myPageResponseDto> {
-    const data: { profilePath?: string; userName?: string; description?: string } = {};
-
-    if (profilePath) {
-      data.profilePath = profilePath;
-    }
+    const data: { userName?: string; description?: string } = {};
 
     if (userName) {
       data.userName = userName;
@@ -51,28 +52,39 @@ export class UsersService {
     if (description) {
       data.description = description;
     }
+    if(!userName || !description) throw new BadRequestException("수정할 내용을 다시 한 번 확인해주세요.");
 
+    try {
     const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
-    const updatedUser = await this.userRepo.updateUserInfo(id, data.profilePath, data.userName, data.description);
+    const updatedUser = await this.userRepo.updateUserInfo(id, data.userName, data.description);
     const updatedResponse = plainToClass(myPageResponseDto, {
       ...updatedUser,
       bookmarkCounts,
     });
 
     return updatedResponse;
+    }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 
   //계정 삭제
   async deleteUser(id: string): Promise<MessageResponseDto> {
-    await this.userRepo.deleteUser(id);
+    try {
+      await this.userRepo.deleteUser(id);
 
-    return { message: "계정을 성공적으로 삭제하였습니다." };
+      return { message: "계정을 성공적으로 삭제하였습니다." };
+    }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 
   //현재 로그인한 사용자 정보 가져오기
   async getCurrentUser(userId: string): Promise<User | null> {
+    try {
     const result = await this.userRepo.getCurrentUser(userId);
-    console.log(result);
 
     if (!result) {
       // 사용자를 찾지 못한 경우에 대한 처리를 여기에 추가합니다.
@@ -80,6 +92,10 @@ export class UsersService {
     }
 
     return result;
+    }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 
   async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<myPageResponseDto> {
@@ -87,6 +103,7 @@ export class UsersService {
     if (!this.s3Service.validateImageFile(file.originalname)) {
       throw new Error("Invalid file type");
     }
+    try {
 
     // 파일명 중복 처리
     const fileNameKey = this.s3Service.generateUniqueFileName(file.originalname);
@@ -97,5 +114,9 @@ export class UsersService {
     const user = this.userRepo.updateImagePathById(userId, ProfilePath);
 
     return plainToClass(myPageResponseDto, user);
+    }
+    catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
+    } 
   }
 }

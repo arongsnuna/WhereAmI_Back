@@ -8,23 +8,4 @@ class UsersRequestDto{
     id: string;
 }
 
-class DeleteUserRequestDto {
-
-    // @ApiProperty()
-    // @IsString()
-    // id: string;
-
-    @ApiProperty()
-    @IsString()
-    password: string;
-
-    @ApiProperty()
-    @IsString()
-    email: string;
-
-    token: string;
-      
-   
-}
-
-export { UsersRequestDto, DeleteUserRequestDto }
+export { UsersRequestDto }
