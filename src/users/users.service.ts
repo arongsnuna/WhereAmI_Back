@@ -23,7 +23,7 @@ export class UsersService {
 
       //북마크 리스트
       const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
-      if(!bookmarkCounts) throw new NotFoundException("북마크를 찾을 수 없습니다.");
+      if (!bookmarkCounts) throw new NotFoundException("북마크를 찾을 수 없습니다.");
 
       const myPageResponse = plainToClass(myPageResponseDto, {
         ...user,
@@ -31,42 +31,36 @@ export class UsersService {
       });
 
       return myPageResponse;
-      }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
+    }
   }
 
   // 마이 프로필 업데이트 (유저네임(userName) | 자기소개(description) )
-  async updateUserInfo(
-    id: string,
-    userName?: string,
-    description?: string,
-  ): Promise<myPageResponseDto> {
-    const data: { userName?: string; description?: string } = {};
+  async updateUserInfo(id: string, email?: string, description?: string): Promise<myPageResponseDto> {
+    const data: { email?: string; description?: string } = {};
 
-    if (userName) {
-      data.userName = userName;
+    if (email) {
+      data.email = email;
     }
 
     if (description) {
       data.description = description;
     }
-    if(!userName || !description) throw new BadRequestException("수정할 내용을 다시 한 번 확인해주세요.");
+    if (!email && !description) throw new BadRequestException("수정할 내용을 다시 한 번 확인해주세요.");
 
     try {
-    const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
-    const updatedUser = await this.userRepo.updateUserInfo(id, data.userName, data.description);
-    const updatedResponse = plainToClass(myPageResponseDto, {
-      ...updatedUser,
-      bookmarkCounts,
-    });
+      const bookmarkCounts = await this.userRepo.countBookmarksBySiDo(id);
+      const updatedUser = await this.userRepo.updateUserInfo(id, data.email, data.description);
+      const updatedResponse = plainToClass(myPageResponseDto, {
+        ...updatedUser,
+        bookmarkCounts,
+      });
 
-    return updatedResponse;
+      return updatedResponse;
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
   }
 
   //계정 삭제
@@ -75,10 +69,9 @@ export class UsersService {
       await this.userRepo.deleteUser(id);
 
       return { message: "계정을 성공적으로 삭제하였습니다." };
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
   }
 
   //현재 로그인한 사용자 정보 가져오기
@@ -86,10 +79,9 @@ export class UsersService {
     try {
       const result = await this.userRepo.getCurrentUser(userId);
       return result;
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
   }
 
   async uploadProfileImage(userId: string, file: Express.Multer.File): Promise<myPageResponseDto> {
@@ -98,20 +90,19 @@ export class UsersService {
       throw new ServiceUnavailableException("s3 서비스에서 오류가 발생하였습니다.");
     }
     try {
-    // 파일명 중복 처리
-    const fileNameKey = this.s3Service.generateUniqueFileName(file.originalname);
-    const fileBuffer = file.buffer;
-    const ProfilePath = await this.s3Service.uploadFile(fileBuffer, fileNameKey, "User");
-    if(!fileNameKey || ProfilePath) {
-      throw new ServiceUnavailableException("s3 서비스에서 오류가 발생하였습니다.");
-    }
-    
-    const user = this.userRepo.updateImagePathById(userId, ProfilePath);
+      // 파일명 중복 처리
+      const fileNameKey = this.s3Service.generateUniqueFileName(file.originalname);
+      const fileBuffer = file.buffer;
+      const ProfilePath = await this.s3Service.uploadFile(fileBuffer, fileNameKey, "User");
+      if (!fileNameKey || ProfilePath) {
+        throw new ServiceUnavailableException("s3 서비스에서 오류가 발생하였습니다.");
+      }
 
-    return plainToClass(myPageResponseDto, user);
+      const user = this.userRepo.updateImagePathById(userId, ProfilePath);
+
+      return plainToClass(myPageResponseDto, user);
+    } catch (error) {
+      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
     }
-    catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.")
-    } 
   }
 }

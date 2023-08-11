@@ -69,7 +69,7 @@ export class UsersController {
   async updateUserInfo(
     @Req() req: any,
     @Param() usersRequestDto: UsersRequestDto,
-    @Body("userName") username: string | null,
+    @Body("email") email: string | null,
     @Body("description") description: string | null,
   ): Promise<myPageResponseDto> {
     if (!req.user.id) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
@@ -80,7 +80,7 @@ export class UsersController {
         throw new ForbiddenException("수정할 수 있는 권한 없음.");
       }
 
-      return await this.usersService.updateUserInfo(usersRequestDto.id, username, description);
+      return await this.usersService.updateUserInfo(usersRequestDto.id, email, description);
     } catch (error) {
       throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }

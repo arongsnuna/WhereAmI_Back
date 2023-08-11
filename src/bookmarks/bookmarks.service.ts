@@ -49,17 +49,13 @@ export class BookmarksService {
   }
 
   //bookmarkId로 불러오기
-  async findOne(id: number): Promise<ResponseBookmarkDto> {
-    try {
-      const bookmark = await this.bookmarksRepository.findOne(id);
-      if (!bookmark || bookmark == undefined) {
-        throw new NotFoundException(`해당 북마크(${id})를 불러올 수 없습니다.`);
-      }
-
-      return plainToClass(ResponseBookmarkDto, bookmark);
-    } catch (error) {
-      throw new NotFoundException("헤당 리소스를 찾을 수 없습니다.");
+  async findOne(userId, landmarkId: number): Promise<ResponseBookmarkDto> {
+    const bookmark = await this.bookmarksRepository.findOne(userId, landmarkId);
+    console.log("bookmark: ", bookmark);
+    if (!bookmark) {
+      throw new NotFoundException(`Bookmark with id ${landmarkId} not found`);
     }
+    return plainToClass(ResponseBookmarkDto, bookmark);
   }
 
   //북마크 페이지 - userId로 북마크 불러오기
