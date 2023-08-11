@@ -73,15 +73,11 @@ export class UsersRepository {
   }
 
   // 마이 프로필 업데이트 (프로필 사진(profilePath) | 유저네임(userName) | 자기소개(description) )
-  async updateUserInfo(
-    id: string,
-    userName?: string,
-    description?: string,
-  ): Promise<User | null> {
-    const data: { userName?: string; description?: string } = {};
-    
-    if (userName) {
-      data.userName = userName;
+  async updateUserInfo(id: string, email?: string, description?: string): Promise<User | null> {
+    const data: { email?: string; description?: string } = {};
+
+    if (email) {
+      data.email = email;
     }
     if (description) {
       data.description = description;
