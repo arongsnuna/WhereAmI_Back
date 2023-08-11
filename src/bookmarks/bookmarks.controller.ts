@@ -82,10 +82,14 @@ export class BookmarksController {
     }
   }
 
-  // 북마크 아이디로 1개 조회 (테스트용)
-  @Get(":id")
-  get(@Param("id", ParseIntPipe) id: number): Promise<ResponseBookmarkDto> {
-    return this.bookmarksService.findOne(id);
+  // 북마크 아이디로 1개 조회
+  @Get(":landmarkId")
+  @ApiOperation({ summary: "랜드마크Id로 북마크 1개 조회" })
+  @UseGuards(JwtAuthGuard)
+  get(@Request() req: any, @Param("landmarkId", ParseIntPipe) landmarkId: number): Promise<ResponseBookmarkDto> {
+    console.log("typeof landmarkId: ", typeof landmarkId);
+    const userId = req.user.id;
+    return this.bookmarksService.findOne(userId, landmarkId);
   }
 
   @Delete(":landmarkId")

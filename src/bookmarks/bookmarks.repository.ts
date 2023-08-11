@@ -33,9 +33,9 @@ export class BookmarksRepository {
       createdAt: bookmark.createdAt,
     };
   }
-  
+
   //존재하는지 확인
-  async findBookmarkById(userId:string, landmarkId: number): Promise<Bookmark | null> {
+  async findBookmarkById(userId: string, landmarkId: number): Promise<Bookmark | null> {
     const bookmarkExists = await this.prisma.bookmark.findFirst({
       where: {
         userId: userId,
@@ -111,9 +111,14 @@ export class BookmarksRepository {
   }
 
   //북마크id로 불러오기
-  async findOne(id: number): Promise<ResponseBookmarkDto> {
-    const bookmark = await this.prisma.bookmark.findUnique({
-      where: { id: id },
+  async findOne(userId, landmarkId: number): Promise<ResponseBookmarkDto> {
+    const bookmark = await this.prisma.bookmark.findFirst({
+      where: {
+        AND: [
+          { landmarkId: landmarkId },
+          { userId: userId }, // 여기에는 실제 사용자 ID를 넣어야 합니다.
+        ],
+      },
       select: {
         id: true,
         createdAt: true,
