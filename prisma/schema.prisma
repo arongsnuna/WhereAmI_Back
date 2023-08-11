@@ -45,17 +45,29 @@ model User {
   deletedAt DateTime? @map("deleted_at") @db.Timestamp()
 
   bookmarks Bookmark[]
+  scheduler Scheduler[]
 }
 
 //Bookmark 모델
 model Bookmark {
-  landmarkId Int      @map("landmark_id")
+  id         Int      @id @default(autoincrement()) @map("bookmark_id")
+  landmarkId Int      @map("landmark_id") 
   userId     String   @map("user_id")
   createdAt  DateTime @default(now()) @map("created_at")
+  status     Boolean  @default(true)
 
   landmark Landmark @relation(fields: [landmarkId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
+}
 
-  @@id([landmarkId, userId])
-  @@map("bookmark")
+//Schedule 모델
+model Scheduler {
+  id        Int       @id @default(autoincrement()) @map("scheduler_id")
+  title     String 
+  startDate DateTime  @db.Timestamp() @map("start_date")
+  endDate   DateTime  @db.Timestamp() @map("end_date")
+  schedule  Json[]
+  userId    String    @map("user_id")
+
+  user      User      @relation(fields: [userId], references: [id])
 }

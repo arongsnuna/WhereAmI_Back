@@ -4,10 +4,15 @@ db:
   database: "postgres"
 
 server:
+  #host: "localhost"
   port: 3000
 
 AiServer:
+  host: "127.0.0.1" #"localhost"
   port: 5001
 
-jwt:
-  expiresIn: 3600
+JWT:
+  expiresIn: 36000 # 10 * 60 * 60s : 10h
+
+IMAGE:
+  filesize: 5242880 # 5MB
