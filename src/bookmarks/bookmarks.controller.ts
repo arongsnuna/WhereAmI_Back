@@ -16,7 +16,6 @@ import {
   Delete,
 } from "@nestjs/common";
 import { BookmarksService } from "./bookmarks.service";
-
 import { ToggleBookmarkDto } from "./dto/bookmark.request.dto";
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 import { MessageResponseDto } from "src/common/dto/message.dto";
@@ -91,6 +90,7 @@ export class BookmarksController {
 
   @Delete(":landmarkId")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async deleteBookmark(
     @Request() req: any,
     @Param("landmarkId", ParseIntPipe) landmarkId: number,
