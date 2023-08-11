@@ -1,4 +1,18 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Param, Delete, ParseIntPipe, InternalServerErrorException, UnauthorizedException, ForbiddenException, BadRequestException } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Req,
+  Param,
+  Delete,
+  ParseIntPipe,
+  InternalServerErrorException,
+  UnauthorizedException,
+  ForbiddenException,
+  BadRequestException,
+} from "@nestjs/common";
 import { SchedulersService } from "./schedulers.service";
 import { JwtAuthGuard } from "src/auth/authentication/guards/jwt.guard";
 import {
@@ -8,10 +22,11 @@ import {
 } from "./dto/schedulers.response.dto";
 import { CreateScheduleRequestDto, DeleteScheduleRequestDto } from "./dto/schedulers.request.dto";
 import { MessageResponseDto } from "src/common/dto/message.dto";
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import GetSchedulerResponse from "src/docs/schedulers/schedulers.swagger";
 
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @ApiTags("schedulers")
 @Controller("scheduler")
 export class SchedulersController {
@@ -24,15 +39,13 @@ export class SchedulersController {
     @Req() req: any,
     @Body() createScheduleRequestDto: CreateScheduleRequestDto,
   ): Promise<CreateSchedulesResponseDto> {
-
     createScheduleRequestDto.userId = req.user.id;
-    if(!req.user.id) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+    if (!req.user.id) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
     try {
       return await this.schedulersService.askGpt(createScheduleRequestDto);
-    }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 
@@ -40,17 +53,15 @@ export class SchedulersController {
   @Get()
   @ApiOperation({ summary: "일정 리스트 불러오기" })
   async getScheduleList(@Req() req: any): Promise<GetScheduleListResponseDto[]> {
-
     const userId = req.user.id;
-    if(!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
+    if (!userId) throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
 
     try {
       const scheduleList = await this.schedulersService.getScheduleList(userId);
 
       return scheduleList;
-    }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 
@@ -66,9 +77,8 @@ export class SchedulersController {
       const schedule = await this.schedulersService.getSchedule(schedulerId);
 
       return schedule;
-    }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 
@@ -82,13 +92,13 @@ export class SchedulersController {
     @Param() deleteScheduleRequestDto: DeleteScheduleRequestDto,
   ): Promise<MessageResponseDto> {
     const userId = req.user.id;
-    if(!userId || userId === undefined){
+    if (!userId || userId === undefined) {
       throw new UnauthorizedException("로그인 되지 않은 사용자입니다.");
     }
 
     const schedulerId = req.params.schedulerId;
-    if(!schedulerId || schedulerId == undefined){
-      throw new BadRequestException("유효하지 않은 요청입니다.")
+    if (!schedulerId || schedulerId == undefined) {
+      throw new BadRequestException("유효하지 않은 요청입니다.");
     }
 
     //본인 확인
@@ -98,16 +108,15 @@ export class SchedulersController {
 
     try {
       const schedulerId = +deleteScheduleRequestDto.schedulerId;
-      if(!schedulerId || schedulerId == undefined){
+      if (!schedulerId || schedulerId == undefined) {
         throw new BadRequestException("유효하지 않은 요청입니다.");
       }
 
       const responseMessage = await this.schedulersService.deleteSchedule(schedulerId);
 
       return responseMessage;
-    }
-    catch (error) {
-      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`)
+    } catch (error) {
+      throw new InternalServerErrorException(`서버 오류 발생 : ${error.message}`);
     }
   }
 }

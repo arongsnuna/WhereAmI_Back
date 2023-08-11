@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from "@nestjs/common";
 import { Configuration, OpenAIApi, CreateChatCompletionRequest } from "openai"; // OpenAI SDK 임포트
 import {
   CreateSchedulesResponseDto,
@@ -10,7 +16,6 @@ import { MessageResponseDto } from "src/common/dto/message.dto";
 import { CreateScheduleRequestDto } from "./dto/schedulers.request.dto";
 import { LandmarkService } from "src/landmarks/landmarks.service";
 import { ChatMessage } from "src/common/schedule/ChatMessage";
-import { NotFound } from "@aws-sdk/client-s3";
 
 @Injectable()
 export class SchedulersService {
@@ -47,15 +52,16 @@ export class SchedulersService {
       messages: ChatMessage(inputdata),
       temperature: 0.1,
     };
-
     try {
       const scheduledata = await this.openai.createChatCompletion(chatCompletionRequest);
-      if (!scheduledata || scheduledata == undefined) {
-        throw new ServiceUnavailableException("openai 서비스 오류가 발생했습니다.");
+
+      // API 응답의 구조 검사
+      if (!scheduledata || !scheduledata.data || !scheduledata.data.choices || !scheduledata.data.choices[0]) {
+        throw new ServiceUnavailableException("OpenAI API로부터 예상치 못한 응답 구조를 받았습니다.");
       }
-      console.log("result: ", scheduledata.data.choices[0].message.content);
+
       const schedule = JSON.parse(scheduledata.data.choices[0].message.content);
-      console.log("!!!!schedule: ", schedule);
+
       // schedule(JSON 데이터)의 imagePath 추가
       let index = 0;
       Object.values(schedule).forEach((dateArray: any[]) => {
@@ -70,13 +76,24 @@ export class SchedulersService {
 
       return scheduleList;
     } catch (error: any) {
-      if (error && error.response && typeof error.response.status !== "undefined") {
-        if (error.response.status === 429) {
-          // 429 오류
-          throw new Error("Failed to create travel plan (429 error)");
+      console.error("Error occurred: ", error);
+
+      // OpenAI와의 통신 오류 처리
+      if (error && error.response) {
+        switch (error.response.status) {
+          case 429:
+            throw new ServiceUnavailableException("OpenAI API의 요청 제한을 초과했습니다.");
+          case 500:
+            throw new ServiceUnavailableException("OpenAI API 서버 내부 오류.");
+          default:
+            throw new ServiceUnavailableException("OpenAI API와 통신 중 알 수 없는 오류 발생.");
         }
       }
-      throw new Error("헤당 리소스를 찾을 수 없습니다.");
+
+      // 그 외 오류 처리
+      throw new ServiceUnavailableException(
+        "OpenAI API와 통신 중 오류 발생. 네트워크 문제나 API의 예상치 못한 동작으로 인해 발생했을 수 있습니다.",
+      );
     }
   }
 

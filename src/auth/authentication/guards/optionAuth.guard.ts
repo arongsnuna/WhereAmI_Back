@@ -1,6 +1,7 @@
 import { Injectable, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
+// 로그인유저(토큰 확인)와 비로그인 유저가 사용하는 Optional Guard
 @Injectable()
 export class OptionalAuthGuard extends AuthGuard("jwt") {
   canActivate(context: ExecutionContext) {
